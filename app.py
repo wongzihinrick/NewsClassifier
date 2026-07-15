@@ -10,7 +10,7 @@ MODEL_PATHS = {
     "Logistic Regression": "models/logistic_regression_model.pkl",
 }
 VECTORIZER_PATH = "models/tfidf_vectorizer.pkl"
-RESULTS_PATH = "models/model_comparison.csv"
+RESULTS_PATH = "results/model_comparison.csv"
 
 
 def clean_text(text):
