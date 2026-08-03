@@ -65,6 +65,50 @@ def predict_category(news_text, selected_model_name):
     return prediction
 
 
+def explain_prediction(news_text, selected_model_name):
+    """
+    Return model scores and detected TF-IDF terms for the input text.
+    """
+    models, vectorizer = load_model_files()
+    model = models[selected_model_name]
+    cleaned_text = clean_text(news_text)
+
+    if hasattr(model, "named_steps"):
+        feature_extractor = model.named_steps["features"]
+        classifier = model.named_steps["model"]
+    else:
+        feature_extractor = vectorizer
+        classifier = model
+
+    text_features = feature_extractor.transform([cleaned_text])
+
+    if hasattr(classifier, "predict_proba"):
+        raw_scores = classifier.predict_proba(text_features)[0]
+        score_label = "Probability"
+    else:
+        raw_scores = classifier.decision_function(text_features)[0]
+        score_label = "Decision score"
+
+    score_df = pd.DataFrame(
+        {
+            "Category": classifier.classes_,
+            score_label: raw_scores,
+        }
+    ).sort_values(score_label, ascending=False)
+
+    feature_names = feature_extractor.get_feature_names_out()
+    feature_row = text_features.tocsr()[0]
+    top_feature_indices = feature_row.indices[feature_row.data.argsort()[::-1]][:10]
+    detected_terms = [
+        feature_names[index]
+        .replace("word_tfidf__", "")
+        .replace("char_tfidf__", "")
+        for index in top_feature_indices
+    ]
+
+    return score_df, detected_terms, score_label
+
+
 def main():
     st.set_page_config(
         page_title="NewsSort AI",
@@ -102,7 +146,34 @@ def main():
             return
 
         prediction = predict_category(news_text, selected_model_name)
+        score_df, detected_terms, score_label = explain_prediction(news_text, selected_model_name)
         st.success(f"Predicted Category: {prediction.title()}")
+
+        with st.container(border=True):
+            st.subheader("Prediction details")
+            if score_label == "Probability":
+                display_scores = score_df.copy()
+                display_scores["Probability"] = (display_scores["Probability"] * 100).round(2)
+                st.dataframe(
+                    display_scores,
+                    column_config={
+                        "Probability": st.column_config.NumberColumn(
+                            "Probability",
+                            format="%.2f%%",
+                        ),
+                    },
+                    hide_index=True,
+                )
+                st.caption("Logistic Regression chooses the category with the highest probability.")
+            else:
+                display_scores = score_df.copy()
+                display_scores["Decision score"] = display_scores["Decision score"].round(4)
+                st.dataframe(display_scores, hide_index=True)
+                st.caption("SVM chooses the category with the strongest decision score.")
+
+            if detected_terms:
+                st.write("Detected TF-IDF signals:")
+                st.write(", ".join(detected_terms))
 
         st.caption(
             "Note: This prototype is for academic demonstration only. "
