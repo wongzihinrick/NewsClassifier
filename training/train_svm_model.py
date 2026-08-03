@@ -1,16 +1,19 @@
 import os
+from pathlib import Path
 
 import joblib
 import pandas as pd
 from sklearn.metrics import accuracy_score, classification_report, f1_score, precision_score, recall_score
+from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
 
-from data_preprocessing import create_tfidf_features, load_and_prepare_dataset
+from data_preprocessing import create_text_vectorizer, load_and_prepare_dataset
 
 
-MODEL_PATH = "models/svm_model.pkl"
-VECTORIZER_PATH = "models/tfidf_vectorizer.pkl"
-RESULT_PATH = "results/svm_results.csv"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+MODEL_PATH = PROJECT_ROOT / "models" / "svm_model.pkl"
+VECTORIZER_PATH = PROJECT_ROOT / "models" / "tfidf_vectorizer.pkl"
+RESULT_PATH = PROJECT_ROOT / "results" / "svm_results.csv"
 
 
 def main():
@@ -18,14 +21,18 @@ def main():
     print("=" * 50)
 
     X_train, X_test, y_train, y_test = load_and_prepare_dataset()
-    vectorizer, X_train_tfidf, X_test_tfidf = create_tfidf_features(X_train, X_test)
 
     print("\nTraining Support Vector Machine model...")
-    model = LinearSVC(random_state=42)
-    model.fit(X_train_tfidf, y_train)
+    model = Pipeline(
+        [
+            ("features", create_text_vectorizer()),
+            ("model", LinearSVC(random_state=42)),
+        ]
+    )
+    model.fit(X_train, y_train)
 
     print("\nEvaluating Support Vector Machine model...")
-    y_pred = model.predict(X_test_tfidf)
+    y_pred = model.predict(X_test)
 
     accuracy = accuracy_score(y_test, y_pred)
     precision = precision_score(y_test, y_pred, average="weighted", zero_division=0)
@@ -50,15 +57,16 @@ def main():
                 "Precision": precision,
                 "Recall": recall,
                 "F1-score": f1,
+                "Feature Method": "Word TF-IDF + Character n-gram TF-IDF",
             }
         ]
     )
 
-    print("\nSaving SVM model, TF-IDF vectorizer, and result...")
-    os.makedirs("models", exist_ok=True)
-    os.makedirs("results", exist_ok=True)
+    print("\nSaving SVM pipeline, TF-IDF vectorizer, and result...")
+    os.makedirs(MODEL_PATH.parent, exist_ok=True)
+    os.makedirs(RESULT_PATH.parent, exist_ok=True)
     joblib.dump(model, MODEL_PATH)
-    joblib.dump(vectorizer, VECTORIZER_PATH)
+    joblib.dump(model.named_steps["features"], VECTORIZER_PATH)
     result_df.to_csv(RESULT_PATH, index=False)
 
     print("Saved model to:", MODEL_PATH)

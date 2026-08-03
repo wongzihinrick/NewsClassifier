@@ -1,11 +1,14 @@
 import re
+from pathlib import Path
 
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import FeatureUnion
 
 
-DATASET_PATH = "dataset/bbc-news-data.csv"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DATASET_PATH = PROJECT_ROOT / "dataset" / "bbc-news-data.csv"
 
 
 def clean_text(text):
@@ -61,14 +64,10 @@ def load_and_prepare_dataset():
 
 def create_tfidf_features(X_train, X_test):
     """
-    Convert text into TF-IDF numerical features.
+    Convert text into stronger TF-IDF numerical features.
     """
-    print("\nCreating TF-IDF features...")
-    vectorizer = TfidfVectorizer(
-        stop_words="english",
-        ngram_range=(1, 1),
-        max_features=10000,
-    )
+    print("\nCreating word and character TF-IDF features...")
+    vectorizer = create_text_vectorizer()
 
     X_train_tfidf = vectorizer.fit_transform(X_train)
     X_test_tfidf = vectorizer.transform(X_test)
@@ -76,3 +75,30 @@ def create_tfidf_features(X_train, X_test):
     print("Number of text features:", X_train_tfidf.shape[1])
 
     return vectorizer, X_train_tfidf, X_test_tfidf
+
+
+def create_text_vectorizer():
+    """
+    Create the enhanced word and character TF-IDF feature extractor.
+    """
+    return FeatureUnion(
+        [
+            (
+                "word_tfidf",
+                TfidfVectorizer(
+                    stop_words="english",
+                    ngram_range=(1, 1),
+                    max_features=10000,
+                ),
+            ),
+            (
+                "char_tfidf",
+                TfidfVectorizer(
+                    analyzer="char_wb",
+                    ngram_range=(3, 5),
+                    max_features=20000,
+                    min_df=2,
+                ),
+            ),
+        ]
+    )

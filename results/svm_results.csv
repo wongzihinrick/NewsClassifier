@@ -1,2 +1,2 @@
-Model,Accuracy,Precision,Recall,F1-score
-Support Vector Machine,0.9887640449438202,0.9889242915471673,0.9887640449438202,0.9887146303592229
+Model,Accuracy,Precision,Recall,F1-score,Feature Method
+Support Vector Machine,0.9932584269662922,0.9933079874536549,0.9932584269662922,0.9932486373580973,Word TF-IDF + Character n-gram TF-IDF

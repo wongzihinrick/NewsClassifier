@@ -1,2 +1,2 @@
-Model,Accuracy,Precision,Recall,F1-score
-Logistic Regression,0.9887640449438202,0.9889330198505514,0.9887640449438202,0.9887431108342624
+Model,Accuracy,Precision,Recall,F1-score,CV F1-score,Best Parameters,Feature Method
+Logistic Regression,0.9887640449438202,0.9888234629952761,0.9887640449438202,0.9887325858141044,0.97697929010097,"{'C': 3.0, 'class_weight': 'balanced', 'solver': 'lbfgs'}",Word TF-IDF + Character n-gram TF-IDF

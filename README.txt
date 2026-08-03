@@ -18,7 +18,7 @@ This project compares two classification models:
 - Support Vector Machine
 - Logistic Regression
 
-Both models use TF-IDF to convert news text into numerical features.
+Both models use word-level TF-IDF and character n-gram TF-IDF to convert news text into numerical features.
 
 
 1. Project Folder Structure
@@ -103,11 +103,11 @@ python training/compare_models.py
 5. Output Files After Training
 ------------------------------
 
-The model files will be saved in the models folder:
+The model pipeline files will be saved in the models folder:
 
 models/svm_model.pkl
 models/logistic_regression_model.pkl
-models/tfidf_vectorizer.pkl
+models/tfidf_vectorizer.pkl  (compatibility vectorizer exported from the SVM pipeline)
 
 The result files will be saved in the results folder:
 
@@ -123,17 +123,17 @@ training/data_preprocessing.py
 - Loads the dataset
 - Cleans the news text
 - Splits the data into training and testing sets
-- Converts text into TF-IDF features
+- Converts text into word-level TF-IDF and character n-gram TF-IDF features
 
 training/train_svm_model.py
 - Trains the Support Vector Machine model
 - Evaluates the model using accuracy, precision, recall, and F1-score
-- Saves the SVM model and result file
+- Saves the complete SVM pipeline and result file
 
 training/train_logistic_regression_model.py
 - Trains the Logistic Regression model
 - Evaluates the model using accuracy, precision, recall, and F1-score
-- Saves the Logistic Regression model and result file
+- Saves the complete Logistic Regression pipeline and result file
 
 training/compare_models.py
 - Reads both model result files
@@ -146,7 +146,7 @@ training/compare_models.py
 
 Run:
 
-python prediction/predict_svm_news.py
+python prediction/predict_svm_news.py --model svm
 
 Example input:
 
@@ -156,7 +156,7 @@ Expected output:
 
 tech
 
-Type exit to stop the test program.
+Use --model svm or --model logistic. Type exit to stop the test program.
 
 
 8. Run the Streamlit Web App
@@ -201,7 +201,7 @@ politics
 
 BBC News Dataset
 -> Text Cleaning
--> TF-IDF Feature Extraction
+-> Word-level TF-IDF and Character n-gram TF-IDF Feature Extraction
 -> Train Support Vector Machine Model
 -> Train Logistic Regression Model
 -> Compare Model Performance
@@ -214,6 +214,7 @@ BBC News Dataset
 
 - Run the training files before running app.py.
 - Do not delete the models folder after training.
-- Do not delete tfidf_vectorizer.pkl because the models need it to convert text into numbers.
+- The saved .pkl model files are complete pipelines, and tfidf_vectorizer.pkl is kept for compatibility.
 - The results folder stores the evaluation scores for the report.
 - This project is for academic demonstration only.
+

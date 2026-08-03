@@ -1,16 +1,18 @@
 import re
+from pathlib import Path
 
 import joblib
 import pandas as pd
 import streamlit as st
 
 
+PROJECT_ROOT = Path(__file__).resolve().parent
 MODEL_PATHS = {
-    "Support Vector Machine": "models/svm_model.pkl",
-    "Logistic Regression": "models/logistic_regression_model.pkl",
+    "Support Vector Machine": PROJECT_ROOT / "models" / "svm_model.pkl",
+    "Logistic Regression": PROJECT_ROOT / "models" / "logistic_regression_model.pkl",
 }
-VECTORIZER_PATH = "models/tfidf_vectorizer.pkl"
-RESULTS_PATH = "results/model_comparison.csv"
+VECTORIZER_PATH = PROJECT_ROOT / "models" / "tfidf_vectorizer.pkl"
+RESULTS_PATH = PROJECT_ROOT / "results" / "model_comparison.csv"
 
 
 def clean_text(text):
@@ -26,13 +28,13 @@ def clean_text(text):
 @st.cache_resource
 def load_model_files():
     """
-    Load the saved TF-IDF vectorizer and trained classification models.
+    Load the saved model pipelines.
     """
     models = {}
     for model_name, model_path in MODEL_PATHS.items():
         models[model_name] = joblib.load(model_path)
 
-    vectorizer = joblib.load(VECTORIZER_PATH)
+    vectorizer = joblib.load(VECTORIZER_PATH) if VECTORIZER_PATH.exists() else None
     return models, vectorizer
 
 
@@ -54,8 +56,11 @@ def predict_category(news_text, selected_model_name):
     model = models[selected_model_name]
 
     cleaned_text = clean_text(news_text)
-    text_features = vectorizer.transform([cleaned_text])
-    prediction = model.predict(text_features)[0]
+    if hasattr(model, "named_steps"):
+        prediction = model.predict([cleaned_text])[0]
+    else:
+        text_features = vectorizer.transform([cleaned_text])
+        prediction = model.predict(text_features)[0]
 
     return prediction
 
@@ -75,20 +80,23 @@ def main():
         "The system will predict whether it belongs to business, entertainment, politics, sport, or tech."
     )
 
-    selected_model_name = st.selectbox(
-        "Choose prediction model",
-        list(MODEL_PATHS.keys()),
-    )
+    with st.form("prediction_form", border=True):
+        selected_model_name = st.selectbox(
+            "Choose prediction model",
+            list(MODEL_PATHS.keys()),
+        )
 
-    st.info(f"Current prediction model: TF-IDF + {selected_model_name}")
+        st.info(f"Current prediction model: Word + Character TF-IDF + {selected_model_name}")
 
-    news_text = st.text_area(
-        "News text",
-        height=180,
-        placeholder="Example: Apple launches new artificial intelligence features for iPhone users...",
-    )
+        news_text = st.text_area(
+            "News text",
+            height=180,
+            placeholder="Example: Apple launches new artificial intelligence features for iPhone users...",
+        )
 
-    if st.button("Predict Category"):
+        submitted = st.form_submit_button("Predict category", icon=":material/search:")
+
+    if submitted:
         if not news_text.strip():
             st.warning("Please enter some news text first.")
             return
@@ -106,15 +114,16 @@ def main():
 
     comparison_df = load_model_comparison()
     if comparison_df is None:
-        st.warning("Model comparison file not found. Please run train_models.py first.")
+        st.warning("Model comparison file not found. Please run the training scripts first.")
     else:
         display_df = comparison_df.copy()
         metric_columns = ["Accuracy", "Precision", "Recall", "F1-score"]
 
         for column in metric_columns:
-            display_df[column] = (display_df[column] * 100).round(2)
+            if column in display_df.columns:
+                display_df[column] = (display_df[column] * 100).round(2)
 
-        st.dataframe(display_df, use_container_width=True)
+        st.dataframe(display_df, hide_index=True)
         st.caption("Scores are shown as percentages.")
 
     with st.expander("About this system"):
@@ -124,7 +133,7 @@ def main():
 
             Current workflow:
             1. Clean the news text.
-            2. Convert text into numerical features using TF-IDF.
+            2. Convert text into numerical features using word and character TF-IDF.
             3. Train and compare Support Vector Machine and Logistic Regression.
             4. Allow users to choose between Support Vector Machine and Logistic Regression.
             """
