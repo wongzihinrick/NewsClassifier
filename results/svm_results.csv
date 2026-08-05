@@ -1,2 +1,2 @@
-Model,Accuracy,Precision,Recall,F1-score,Feature Method
-Support Vector Machine,0.9932584269662922,0.9933079874536549,0.9932584269662922,0.9932486373580973,Word TF-IDF + Character n-gram TF-IDF
+Model,Accuracy,Precision,Recall,F1-score,CV F1-score,Best Parameters,Feature Method
+Support Vector Machine,0.9932584269662922,0.9933079874536549,0.9932584269662922,0.9932486373580973,0.9797716486229383,"{'C': 3.0, 'class_weight': 'balanced'}",Word TF-IDF + Character n-gram TF-IDF

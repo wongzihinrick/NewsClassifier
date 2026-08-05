@@ -17,12 +17,12 @@ def main():
 
     if not os.path.exists(SVM_RESULT_PATH):
         print("Missing SVM result file.")
-        print("Please run: python train_svm_model.py")
+        print("Please run: python training/train_svm_model.py")
         return
 
     if not os.path.exists(LOGISTIC_RESULT_PATH):
         print("Missing Logistic Regression result file.")
-        print("Please run: python train_logistic_regression_model.py")
+        print("Please run: python training/train_logistic_regression_model.py")
         return
         
     if not os.path.exists(MULTINOMIAL_NB_RESULT_PATH):

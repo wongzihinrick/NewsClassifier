@@ -49,6 +49,17 @@ def load_model_comparison():
         return None
 
 
+def get_best_model(comparison_df):
+    """
+    Return the model with the highest F1-score from the comparison results.
+    """
+    if comparison_df is None or comparison_df.empty or "F1-score" not in comparison_df.columns:
+        return None
+
+    best_row = comparison_df.sort_values("F1-score", ascending=False).iloc[0]
+    return best_row["Model"], best_row["F1-score"]
+
+
 def predict_category(news_text, selected_model_name):
     """
     Predict the category of the news text using the selected model.
@@ -165,12 +176,16 @@ def main():
                     },
                     hide_index=True,
                 )
-                st.caption("Logistic Regression chooses the category with the highest probability.")
+                chart_df = display_scores.set_index("Category")
+                st.bar_chart(chart_df, y="Probability")
+                st.caption(f"{selected_model_name} chooses the category with the highest probability.")
             else:
                 display_scores = score_df.copy()
                 display_scores["Decision score"] = display_scores["Decision score"].round(4)
                 st.dataframe(display_scores, hide_index=True)
-                st.caption("SVM chooses the category with the strongest decision score.")
+                chart_df = display_scores.set_index("Category")
+                st.bar_chart(chart_df, y="Decision score")
+                st.caption(f"{selected_model_name} chooses the category with the strongest decision score.")
 
             if detected_terms:
                 st.write("Detected TF-IDF signals:")
@@ -188,6 +203,11 @@ def main():
     if comparison_df is None:
         st.warning("Model comparison file not found. Please run the training scripts first.")
     else:
+        best_model = get_best_model(comparison_df)
+        if best_model is not None:
+            best_model_name, best_f1_score = best_model
+            st.success(f"Best model: {best_model_name} with F1-score {(best_f1_score * 100):.2f}%")
+
         display_df = comparison_df.copy()
         metric_columns = ["Accuracy", "Precision", "Recall", "F1-score"]
 
@@ -206,8 +226,8 @@ def main():
             Current workflow:
             1. Clean the news text.
             2. Convert text into numerical features using word and character TF-IDF.
-            3. Train and compare Support Vector Machine and Logistic Regression.
-            4. Allow users to choose between Support Vector Machine and Logistic Regression.
+            3. Train and compare Support Vector Machine, Logistic Regression, and Multinomial Naive Bayes.
+            4. Allow users to choose between all three trained models.
             """
         )
 
