@@ -10,6 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 MODEL_PATHS = {
     "Support Vector Machine": PROJECT_ROOT / "models" / "svm_model.pkl",
     "Logistic Regression": PROJECT_ROOT / "models" / "logistic_regression_model.pkl",
+    "Multinomial Naive Bayes": PROJECT_ROOT / "models" / "multinomial_naive_bayes_model.pkl",
 }
 VECTORIZER_PATH = PROJECT_ROOT / "models" / "tfidf_vectorizer.pkl"
 RESULTS_PATH = PROJECT_ROOT / "results" / "model_comparison.csv"
