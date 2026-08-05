@@ -9,6 +9,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 MODEL_PATHS = {
     "svm": PROJECT_ROOT / "models" / "svm_model.pkl",
     "logistic": PROJECT_ROOT / "models" / "logistic_regression_model.pkl",
+    "multinomial_nb": PROJECT_ROOT / "models" / "multinomial_naive_bayes_model.pkl",
+
 }
 VECTORIZER_PATH = PROJECT_ROOT / "models" / "tfidf_vectorizer.pkl"
 
