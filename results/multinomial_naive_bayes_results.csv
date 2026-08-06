@@ -1,2 +1,2 @@
-Model,Accuracy,Precision,Recall,F1-score,Feature Method,CV F1-score,Best Parameters
-Multinomial Naive Bayes,0.9775280898876404,0.9782168282105264,0.9775280898876404,0.9775864566958185,Word TF-IDF + Character n-gram TF-IDF,0.9741549052670759,"{'alpha': 0.01, 'fit_prior': False}"
+Model,Accuracy,Precision,Recall,F1-score,CV F1-score,Best Parameters,Feature Method
+Multinomial Naive Bayes,0.9820224719101124,0.9824592376718634,0.9820224719101124,0.9819998733700068,0.9769860639429332,"{'features__char_tfidf__max_features': 20000, 'features__char_tfidf__ngram_range': (3, 5), 'features__word_tfidf__max_features': 20000, 'features__word_tfidf__ngram_range': (1, 2), 'model__alpha': 0.05, 'model__fit_prior': False}",Tuned Word TF-IDF + Character n-gram TF-IDF
