@@ -226,7 +226,7 @@ def main():
             Current workflow:
             1. Clean the news text.
             2. Convert text into numerical features using word and character TF-IDF.
-            3. Train and compare Support Vector Machine, Logistic Regression, and Multinomial Naive Bayes.
+            3. Train and compare Support Vector Machine, Logistic Regression and Multinomial Naive Bayes.
             4. Allow users to choose between all three trained models.
             """
         )
