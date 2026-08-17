@@ -10,9 +10,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 MODEL_PATHS = {
     "Support Vector Machine": PROJECT_ROOT / "models" / "svm_model.pkl",
     "Logistic Regression": PROJECT_ROOT / "models" / "logistic_regression_model.pkl",
-    "Multinomial Naive Bayes": PROJECT_ROOT / "models" / "multinomial_naive_bayes_model.pkl",
+    "Complement Naive Bayes": PROJECT_ROOT / "models" / "complement_naive_bayes_model.pkl",
 }
-VECTORIZER_PATH = PROJECT_ROOT / "models" / "tfidf_vectorizer.pkl"
 RESULTS_PATH = PROJECT_ROOT / "results" / "model_comparison.csv"
 
 QUICK_SAMPLES = {
@@ -191,16 +190,17 @@ def clean_text(text):
 
 
 @st.cache_resource
-def load_model_files():
+def load_model(model_name, model_path_string):
     """
-    Load the saved model pipelines.
+    Load and cache one selected model pipeline.
     """
-    models = {}
-    for model_name, model_path in MODEL_PATHS.items():
-        models[model_name] = joblib.load(model_path)
+    model_path = Path(model_path_string)
+    if not model_path.exists():
+        raise FileNotFoundError(
+            f"The model file for {model_name} was not found: {model_path}"
+        )
 
-    vectorizer = joblib.load(VECTORIZER_PATH) if VECTORIZER_PATH.exists() else None
-    return models, vectorizer
+    return joblib.load(model_path)
 
 
 @st.cache_data
@@ -225,39 +225,31 @@ def get_best_model(comparison_df):
     return best_row["Model"], best_row["F1-score"]
 
 
-def get_model_parts(model, vectorizer):
+def get_model_parts(model):
     """
     Return the feature extractor and classifier from a saved model.
     """
-    if hasattr(model, "named_steps"):
-        return model.named_steps["features"], model.named_steps["model"]
-
-    return vectorizer, model
+    return model.named_steps["features"], model.named_steps["model"]
 
 
 def predict_category(news_text, selected_model_name):
     """
     Predict the category of the news text using the selected model.
     """
-    models, vectorizer = load_model_files()
-    model = models[selected_model_name]
+    model_path = MODEL_PATHS[selected_model_name]
+    model = load_model(selected_model_name, str(model_path))
     cleaned_text = clean_text(news_text)
-
-    if hasattr(model, "named_steps"):
-        return model.predict([cleaned_text])[0]
-
-    text_features = vectorizer.transform([cleaned_text])
-    return model.predict(text_features)[0]
+    return model.predict([cleaned_text])[0]
 
 
 def explain_prediction(news_text, selected_model_name):
     """
     Return model scores and detected TF-IDF terms for the input text.
     """
-    models, vectorizer = load_model_files()
-    model = models[selected_model_name]
+    model_path = MODEL_PATHS[selected_model_name]
+    model = load_model(selected_model_name, str(model_path))
     cleaned_text = clean_text(news_text)
-    feature_extractor, classifier = get_model_parts(model, vectorizer)
+    feature_extractor, classifier = get_model_parts(model)
 
     text_features = feature_extractor.transform([cleaned_text])
 
@@ -456,8 +448,15 @@ def render_predict_page(selected_model_name):
             st.warning("Please enter at least 10 words so the model has enough text to classify.")
             return
 
-        prediction = predict_category(news_text, selected_model_name)
-        score_df, detected_terms, score_label = explain_prediction(news_text, selected_model_name)
+        try:
+            prediction = predict_category(news_text, selected_model_name)
+            score_df, detected_terms, score_label = explain_prediction(
+                news_text,
+                selected_model_name,
+            )
+        except (FileNotFoundError, KeyError, ValueError) as error:
+            st.error(f"Prediction failed: {error}")
+            return
         top_score = get_top_score(score_df, score_label)
 
         st.success(f"Predicted Category: {prediction.title()} ({score_label}: {top_score})")
@@ -600,7 +599,7 @@ def render_about_page():
         3. Use the `category` column as the target label.
         4. Clean the news text by converting it to lowercase and removing unnecessary symbols.
         5. Convert the text into numerical features using word and character TF-IDF.
-        6. Train Support Vector Machine, Logistic Regression, and Multinomial Naive Bayes.
+        6. Train Support Vector Machine, Logistic Regression, and Complement Naive Bayes.
         7. Compare the models using accuracy, precision, recall, and F1-score.
         8. Use the trained models inside the Streamlit prototype.
         """
