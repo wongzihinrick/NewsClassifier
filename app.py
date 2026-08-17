@@ -457,13 +457,6 @@ def render_predict_page(selected_model_name):
         "The system will predict whether it belongs to business, entertainment, politics, sport, or tech."
     )
 
-    news_text = render_news_input()
-    col1, col2 = st.columns([1, 1])
-    predict_clicked = col1.button("Predict Category", type="primary", use_container_width=True)
-    ("Clear Input", use_container_width=True)
-
-   col2.button("Clear Input",use_container_width=True,on_click=clear_news_input,)
-
     if predict_clicked:
         if len(news_text.split()) < 10:
             st.warning("Please enter at least 10 words so the model has enough text to classify.")
