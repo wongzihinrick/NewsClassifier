@@ -17,7 +17,7 @@ The system can predict these categories:
 This project compares three classification models:
 - Support Vector Machine
 - Logistic Regression
-- Multinomial Naive Bayes
+- Complement Naive Bayes
 
 All models use word-level TF-IDF and character n-gram TF-IDF to convert news text into numerical features.
 
@@ -32,20 +32,20 @@ NewsClassifier/
 |-- models/
 |   |-- svm_model.pkl
 |   |-- logistic_regression_model.pkl
-|   |-- multinomial_naive_bayes_model.pkl
+|   |-- complement_naive_bayes_model.pkl
 |   |-- tfidf_vectorizer.pkl
 |
 |-- results/
 |   |-- svm_results.csv
 |   |-- logistic_regression_results.csv
-|   |-- multinomial_naive_bayes_results.csv
+|   |-- complement_naive_bayes_results.csv
 |   |-- model_comparison.csv
 |
 |-- training/
 |   |-- data_preprocessing.py
 |   |-- train_svm_model.py
 |   |-- train_logistic_regression_model.py
-|   |-- train_multinomial_naive_bayes_model.py
+|   |-- train_complement_naive_bayes_model.py
 |   |-- compare_models.py
 |
 |-- prediction/
@@ -99,9 +99,9 @@ Step 2: Train Logistic Regression model
 
 python training/train_logistic_regression_model.py
 
-Step 3: Train Multinomial Naive Bayes model
+Step 3: Train Complement Naive Bayes model
 
-python training/train_multinomial_naive_bayes_model.py
+python training/train_complement_naive_bayes_model.py
 
 Step 4: Create model comparison result
 
@@ -115,14 +115,14 @@ The model pipeline files will be saved in the models folder:
 
 models/svm_model.pkl
 models/logistic_regression_model.pkl
-models/multinomial_naive_bayes_model.pkl
+models/complement_naive_bayes_model.pkl
 models/tfidf_vectorizer.pkl  (compatibility vectorizer exported from the SVM pipeline)
 
 The result files will be saved in the results folder:
 
 results/svm_results.csv
 results/logistic_regression_results.csv
-results/multinomial_naive_bayes_results.csv
+results/complement_naive_bayes_results.csv
 results/model_comparison.csv
 
 
@@ -145,10 +145,10 @@ training/train_logistic_regression_model.py
 - Evaluates the model using accuracy, precision, recall, and F1-score
 - Saves the complete Logistic Regression pipeline and result file
 
-training/train_multinomial_naive_bayes_model.py
-- Trains the Multinomial Naive Bayes model
+training/train_complement_naive_bayes_model.py
+- Trains and tunes the Complement Naive Bayes model
 - Evaluates the model using accuracy, precision, recall, and F1-score
-- Saves the complete Multinomial Naive Bayes pipeline and result file
+- Saves the complete Complement Naive Bayes pipeline and result file
 
 training/compare_models.py
 - Reads all model result files
@@ -171,7 +171,7 @@ Expected output:
 
 tech
 
-Use --model svm, --model logistic, or --model multinomial_nb. Type exit to stop the test program.
+Use --model svm, --model logistic, or --model complement_nb. Type exit to stop the test program.
 
 
 8. Run the Streamlit Web App
@@ -220,7 +220,7 @@ BBC News Dataset
 -> Word-level TF-IDF and Character n-gram TF-IDF Feature Extraction
 -> Train Support Vector Machine Model
 -> Train Logistic Regression Model
--> Train Multinomial Naive Bayes Model
+-> Train Complement Naive Bayes Model
 -> Compare Model Performance
 -> Streamlit Web App
 -> Predict News Category
@@ -234,4 +234,3 @@ BBC News Dataset
 - The saved .pkl model files are complete pipelines, and tfidf_vectorizer.pkl is kept for compatibility.
 - The results folder stores the evaluation scores for the report.
 - This project is for academic demonstration only.
-
