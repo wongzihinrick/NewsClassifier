@@ -256,10 +256,6 @@ def explain_prediction(news_text, selected_model_name):
     text_features = feature_extractor.transform([cleaned_text])
 
     if isinstance(classifier, ComplementNB):
-        # ComplementNB's normalized predict_proba values are often almost
-        # uniform (about 20% per class here), even when its prediction is
-        # accurate. Use its class-comparison scores and scale them relatively
-        # from 0 to 100. These are not probabilities.
         complement_scores = text_features @ classifier.feature_log_prob_.T
         raw_scores = np.asarray(complement_scores).ravel()
         score_range = raw_scores.max() - raw_scores.min()
