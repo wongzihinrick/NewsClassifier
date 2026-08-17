@@ -1,4 +1,5 @@
 Model,Accuracy,Precision,Recall,F1-score,CV F1-score,Best Parameters,Feature Method
 Support Vector Machine,0.9932584269662922,0.9933079874536548,0.9932584269662922,0.9932486373580972,0.9797716486229384,"{'C': 3.0, 'class_weight': 'balanced'}",Word TF-IDF + Character n-gram TF-IDF
 Logistic Regression,0.9887640449438202,0.988823462995276,0.9887640449438202,0.9887325858141044,0.97697929010097,"{'C': 3.0, 'class_weight': 'balanced', 'solver': 'lbfgs'}",Word TF-IDF + Character n-gram TF-IDF
-Multinomial Naive Bayes,0.9820224719101124,0.9824592376718634,0.9820224719101124,0.9819998733700068,0.973611640896916,"{'alpha': 0.05, 'fit_prior': True}",Tuned Word TF-IDF + Character n-gram TF-IDF
+Complement Naive Bayes,0.9842696629213484,0.9843330026862156,0.9842696629213484,0.9842190365630712,0.9724694867727266,"{'alpha': 0.1, 'norm': True}",Word TF-IDF + Character n-gram TF-IDF
+
