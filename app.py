@@ -460,11 +460,7 @@ def render_predict_page(selected_model_name):
     news_text = render_news_input()
     col1, col2 = st.columns([1, 1])
     predict_clicked = col1.button("Predict Category", type="primary", use_container_width=True)
-    clear_clicked = col2.button("Clear Input", use_container_width=True)
-
-    if clear_clicked:
-        st.session_state["news_text"] = ""
-        st.rerun()
+    col2.button("Clear Input",use_container_width=True,on_click=clear_news_input,)
 
     if predict_clicked:
         if len(news_text.split()) < 10:
@@ -493,6 +489,11 @@ def render_predict_page(selected_model_name):
             "It predicts a category based on patterns learned from the training dataset."
         )
 
+def clear_news_input():
+    """
+    Clear the shared news input before Streamlit renders the widget.
+    """
+    st.session_state["news_text"] = ""
 
 def render_multi_model_page():
     """
@@ -504,11 +505,7 @@ def render_multi_model_page():
     news_text = render_news_input()
     col1, col2 = st.columns([1, 1])
     compare_clicked = col1.button("Compare All Models", type="primary", use_container_width=True)
-    clear_clicked = col2.button("Clear Input", use_container_width=True)
-
-    if clear_clicked:
-        st.session_state["news_text"] = ""
-        st.rerun()
+    col2.button("Clear Input",use_container_width=True,on_click=clear_news_input,)
 
     if compare_clicked:
         if len(news_text.split()) < 10:
