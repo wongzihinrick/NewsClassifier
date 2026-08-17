@@ -24,37 +24,40 @@ QUICK_SAMPLES = {
 }
 
 
-def apply_professional_news_blue_theme():
+def apply_black_purple_theme():
     """
-    Apply a clean light dashboard theme using professional news-blue colors.
+    Apply a consistent black and purple dashboard theme.
     """
     st.markdown(
         """
         <style>
             :root {
-                --app-bg: #F8FAFC;
-                --card-bg: #FFFFFF;
-                --primary-blue: #2563EB;
-                --primary-blue-dark: #1D4ED8;
-                --navy: #0F172A;
-                --muted-text: #64748B;
-                --border: #E2E8F0;
-                --success: #16A34A;
-                --warning: #DC2626;
+                --app-bg: #0B0B12;
+                --sidebar-bg: #111827;
+                --card-bg: #151522;
+                --card-bg-soft: #1E1B2E;
+                --primary-purple: #8B5CF6;
+                --primary-purple-dark: #7C3AED;
+                --primary-purple-soft: #A78BFA;
+                --text-main: #F8FAFC;
+                --text-muted: #A1A1AA;
+                --border: #2D2A3D;
+                --success: #22C55E;
+                --warning: #F87171;
             }
 
             .stApp {
                 background: var(--app-bg);
-                color: var(--navy);
+                color: var(--text-main);
             }
 
             h1, h2, h3, h4, h5, h6, p, label, span, div {
-                color: var(--navy);
+                color: var(--text-main);
             }
 
             [data-testid="stSidebar"] {
-                background: var(--navy);
-                border-right: 1px solid #1E293B;
+                background: var(--sidebar-bg);
+                border-right: 1px solid var(--border);
             }
 
             [data-testid="stSidebar"] h1,
@@ -64,25 +67,25 @@ def apply_professional_news_blue_theme():
             [data-testid="stSidebar"] label,
             [data-testid="stSidebar"] span,
             [data-testid="stSidebar"] div {
-                color: #F8FAFC;
+                color: var(--text-main);
             }
 
             [data-testid="stSidebar"] .stCaptionContainer,
             [data-testid="stSidebar"] small {
-                color: #CBD5E1;
+                color: var(--text-muted);
             }
 
             [data-testid="stSidebar"] button {
-                background: #1E293B;
-                color: #F8FAFC;
-                border: 1px solid #334155;
+                background: var(--card-bg-soft);
+                color: var(--text-main);
+                border: 1px solid var(--border);
                 border-radius: 10px;
             }
 
             [data-testid="stSidebar"] button:hover {
-                background: var(--primary-blue);
+                background: var(--primary-purple);
                 color: #FFFFFF;
-                border-color: var(--primary-blue);
+                border-color: var(--primary-purple);
             }
 
             div[data-testid="stForm"],
@@ -90,35 +93,40 @@ def apply_professional_news_blue_theme():
                 background: var(--card-bg);
                 border: 1px solid var(--border);
                 border-radius: 16px;
-                box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
             }
 
             textarea,
             input,
             [data-baseweb="select"] > div {
-                background: #FFFFFF !important;
-                color: var(--navy) !important;
+                background: var(--card-bg-soft) !important;
+                color: var(--text-main) !important;
                 border-color: var(--border) !important;
+            }
+
+            textarea::placeholder,
+            input::placeholder {
+                color: #71717A !important;
             }
 
             textarea:focus,
             input:focus {
-                border-color: var(--primary-blue) !important;
-                box-shadow: 0 0 0 1px var(--primary-blue) !important;
+                border-color: var(--primary-purple) !important;
+                box-shadow: 0 0 0 1px var(--primary-purple) !important;
             }
 
             .stButton > button {
                 border-radius: 10px;
-                border: 1px solid var(--primary-blue);
-                background: var(--primary-blue);
+                border: 1px solid var(--primary-purple);
+                background: var(--primary-purple);
                 color: #FFFFFF;
                 font-weight: 600;
             }
 
             .stButton > button:hover {
-                background: var(--primary-blue-dark);
+                background: var(--primary-purple-dark);
                 color: #FFFFFF;
-                border-color: var(--primary-blue-dark);
+                border-color: var(--primary-purple-dark);
             }
 
             [data-testid="stMetric"] {
@@ -126,16 +134,16 @@ def apply_professional_news_blue_theme():
                 border: 1px solid var(--border);
                 border-radius: 16px;
                 padding: 18px;
-                box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
             }
 
             [data-testid="stMetricLabel"] p {
-                color: var(--muted-text);
+                color: var(--text-muted);
                 font-weight: 700;
             }
 
             [data-testid="stMetricValue"] {
-                color: var(--primary-blue);
+                color: var(--primary-purple-soft);
             }
 
             [data-testid="stDataFrame"] {
@@ -152,7 +160,19 @@ def apply_professional_news_blue_theme():
             }
 
             .stCaptionContainer {
-                color: var(--muted-text);
+                color: var(--text-muted);
+            }
+
+            .stSelectbox [data-baseweb="select"] svg {
+                color: var(--text-main);
+            }
+
+            [data-testid="stRadio"] label {
+                color: var(--text-main);
+            }
+
+            [data-testid="stHeader"] {
+                background: var(--app-bg);
             }
         </style>
         """,
@@ -599,7 +619,7 @@ def main():
         page_icon="N",
         layout="wide",
     )
-    apply_professional_news_blue_theme()
+    apply_black_purple_theme()
 
     page, selected_model_name = render_sidebar()
 
