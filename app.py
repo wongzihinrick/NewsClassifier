@@ -2,8 +2,10 @@ import re
 from pathlib import Path
 
 import joblib
+import numpy as np
 import pandas as pd
 import streamlit as st
+from sklearn.naive_bayes import ComplementNB
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -253,7 +255,20 @@ def explain_prediction(news_text, selected_model_name):
 
     text_features = feature_extractor.transform([cleaned_text])
 
-    if hasattr(classifier, "predict_proba"):
+    if isinstance(classifier, ComplementNB):
+        # ComplementNB's normalized predict_proba values are often almost
+        # uniform (about 20% per class here), even when its prediction is
+        # accurate. Use its class-comparison scores and scale them relatively
+        # from 0 to 100. These are not probabilities.
+        complement_scores = text_features @ classifier.feature_log_prob_.T
+        raw_scores = np.asarray(complement_scores).ravel()
+        score_range = raw_scores.max() - raw_scores.min()
+        if score_range > 0:
+            raw_scores = (raw_scores - raw_scores.min()) / score_range * 100
+        else:
+            raw_scores = np.zeros_like(raw_scores)
+        score_label = "Relative score"
+    elif hasattr(classifier, "predict_proba"):
         raw_scores = classifier.predict_proba(text_features)[0]
         score_label = "Probability"
     else:
@@ -289,6 +304,9 @@ def get_top_score(score_df, score_label):
 
     if score_label == "Probability":
         return f"{top_value * 100:.2f}%"
+
+    if score_label == "Relative score":
+        return f"{top_value:.2f}/100"
 
     return f"{top_value:.4f}"
 
@@ -401,6 +419,15 @@ def render_score_breakdown(score_df, score_label, selected_model_name):
         )
         st.bar_chart(display_scores.set_index("Category"), y="Probability")
         st.caption(f"{selected_model_name} chooses the category with the highest probability.")
+    elif score_label == "Relative score":
+        display_scores = score_df.copy()
+        display_scores["Relative score"] = display_scores["Relative score"].round(2)
+        st.dataframe(display_scores, hide_index=True, use_container_width=True)
+        st.bar_chart(display_scores.set_index("Category"), y="Relative score")
+        st.caption(
+            "Complement Naive Bayes scores are scaled from 0 to 100 for this input. "
+            "They compare the categories but are not probabilities or calibrated confidence."
+        )
     else:
         display_scores = score_df.copy()
         display_scores["Decision score"] = display_scores["Decision score"].round(4)
