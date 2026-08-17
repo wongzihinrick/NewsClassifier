@@ -462,9 +462,7 @@ def render_predict_page(selected_model_name):
     predict_clicked = col1.button("Predict Category", type="primary", use_container_width=True)
     ("Clear Input", use_container_width=True)
 
-    if clear_clicked:
-        st.session_state["news_text"] = ""
-        st.rerun()
+   col2.button("Clear Input",use_container_width=True,on_click=clear_news_input,)
 
     if predict_clicked:
         if len(news_text.split()) < 10:
