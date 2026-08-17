@@ -24,6 +24,142 @@ QUICK_SAMPLES = {
 }
 
 
+def apply_professional_news_blue_theme():
+    """
+    Apply a clean light dashboard theme using professional news-blue colors.
+    """
+    st.markdown(
+        """
+        <style>
+            :root {
+                --app-bg: #F8FAFC;
+                --card-bg: #FFFFFF;
+                --primary-blue: #2563EB;
+                --primary-blue-dark: #1D4ED8;
+                --navy: #0F172A;
+                --muted-text: #64748B;
+                --border: #E2E8F0;
+                --success: #16A34A;
+                --warning: #DC2626;
+            }
+
+            .stApp {
+                background: var(--app-bg);
+                color: var(--navy);
+            }
+
+            h1, h2, h3, h4, h5, h6, p, label, span, div {
+                color: var(--navy);
+            }
+
+            [data-testid="stSidebar"] {
+                background: var(--navy);
+                border-right: 1px solid #1E293B;
+            }
+
+            [data-testid="stSidebar"] h1,
+            [data-testid="stSidebar"] h2,
+            [data-testid="stSidebar"] h3,
+            [data-testid="stSidebar"] p,
+            [data-testid="stSidebar"] label,
+            [data-testid="stSidebar"] span,
+            [data-testid="stSidebar"] div {
+                color: #F8FAFC;
+            }
+
+            [data-testid="stSidebar"] .stCaptionContainer,
+            [data-testid="stSidebar"] small {
+                color: #CBD5E1;
+            }
+
+            [data-testid="stSidebar"] button {
+                background: #1E293B;
+                color: #F8FAFC;
+                border: 1px solid #334155;
+                border-radius: 10px;
+            }
+
+            [data-testid="stSidebar"] button:hover {
+                background: var(--primary-blue);
+                color: #FFFFFF;
+                border-color: var(--primary-blue);
+            }
+
+            div[data-testid="stForm"],
+            div[data-testid="stVerticalBlockBorderWrapper"] {
+                background: var(--card-bg);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+            }
+
+            textarea,
+            input,
+            [data-baseweb="select"] > div {
+                background: #FFFFFF !important;
+                color: var(--navy) !important;
+                border-color: var(--border) !important;
+            }
+
+            textarea:focus,
+            input:focus {
+                border-color: var(--primary-blue) !important;
+                box-shadow: 0 0 0 1px var(--primary-blue) !important;
+            }
+
+            .stButton > button {
+                border-radius: 10px;
+                border: 1px solid var(--primary-blue);
+                background: var(--primary-blue);
+                color: #FFFFFF;
+                font-weight: 600;
+            }
+
+            .stButton > button:hover {
+                background: var(--primary-blue-dark);
+                color: #FFFFFF;
+                border-color: var(--primary-blue-dark);
+            }
+
+            [data-testid="stMetric"] {
+                background: var(--card-bg);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                padding: 18px;
+                box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+            }
+
+            [data-testid="stMetricLabel"] p {
+                color: var(--muted-text);
+                font-weight: 700;
+            }
+
+            [data-testid="stMetricValue"] {
+                color: var(--primary-blue);
+            }
+
+            [data-testid="stDataFrame"] {
+                background: var(--card-bg);
+                border-radius: 14px;
+            }
+
+            .stAlert {
+                border-radius: 12px;
+            }
+
+            hr {
+                border-color: var(--border);
+            }
+
+            .stCaptionContainer {
+                color: var(--muted-text);
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def clean_text(text):
     """
     Clean the input news text using the same style as the training file.
@@ -463,6 +599,7 @@ def main():
         page_icon="N",
         layout="wide",
     )
+    apply_professional_news_blue_theme()
 
     page, selected_model_name = render_sidebar()
 
