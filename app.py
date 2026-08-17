@@ -15,6 +15,14 @@ MODEL_PATHS = {
 VECTORIZER_PATH = PROJECT_ROOT / "models" / "tfidf_vectorizer.pkl"
 RESULTS_PATH = PROJECT_ROOT / "results" / "model_comparison.csv"
 
+QUICK_SAMPLES = {
+    "Tech": "Apple announced new artificial intelligence features for mobile devices, software developers, and cloud technology users.",
+    "Business": "The company reported higher profit after strong sales growth, market recovery, and increased investor confidence.",
+    "Politics": "The government announced a new policy after parliament debated election reform and public service funding.",
+    "Sport": "The football team won the final match after the player scored a late goal in the tournament.",
+    "Entertainment": "The actor received an award at the film festival after the movie became popular with audiences.",
+}
+
 
 def clean_text(text):
     """
@@ -39,6 +47,7 @@ def load_model_files():
     return models, vectorizer
 
 
+@st.cache_data
 def load_model_comparison():
     """
     Load model comparison results if the file exists.
@@ -60,21 +69,29 @@ def get_best_model(comparison_df):
     return best_row["Model"], best_row["F1-score"]
 
 
+def get_model_parts(model, vectorizer):
+    """
+    Return the feature extractor and classifier from a saved model.
+    """
+    if hasattr(model, "named_steps"):
+        return model.named_steps["features"], model.named_steps["model"]
+
+    return vectorizer, model
+
+
 def predict_category(news_text, selected_model_name):
     """
     Predict the category of the news text using the selected model.
     """
     models, vectorizer = load_model_files()
     model = models[selected_model_name]
-
     cleaned_text = clean_text(news_text)
-    if hasattr(model, "named_steps"):
-        prediction = model.predict([cleaned_text])[0]
-    else:
-        text_features = vectorizer.transform([cleaned_text])
-        prediction = model.predict(text_features)[0]
 
-    return prediction
+    if hasattr(model, "named_steps"):
+        return model.predict([cleaned_text])[0]
+
+    text_features = vectorizer.transform([cleaned_text])
+    return model.predict(text_features)[0]
 
 
 def explain_prediction(news_text, selected_model_name):
@@ -84,13 +101,7 @@ def explain_prediction(news_text, selected_model_name):
     models, vectorizer = load_model_files()
     model = models[selected_model_name]
     cleaned_text = clean_text(news_text)
-
-    if hasattr(model, "named_steps"):
-        feature_extractor = model.named_steps["features"]
-        classifier = model.named_steps["model"]
-    else:
-        feature_extractor = vectorizer
-        classifier = model
+    feature_extractor, classifier = get_model_parts(model, vectorizer)
 
     text_features = feature_extractor.transform([cleaned_text])
 
@@ -121,115 +132,348 @@ def explain_prediction(news_text, selected_model_name):
     return score_df, detected_terms, score_label
 
 
-def main():
-    st.set_page_config(
-        page_title="NewsSort AI",
-        page_icon="N",
-        layout="centered",
+def get_top_score(score_df, score_label):
+    """
+    Convert the top model score into a display-friendly value.
+    """
+    top_row = score_df.iloc[0]
+    top_value = top_row[score_label]
+
+    if score_label == "Probability":
+        return f"{top_value * 100:.2f}%"
+
+    return f"{top_value:.4f}"
+
+
+def prepare_metrics_table(comparison_df):
+    """
+    Format model evaluation metrics as percentages for display.
+    """
+    if comparison_df is None:
+        return None
+
+    display_df = comparison_df.copy()
+    metric_columns = ["Accuracy", "Precision", "Recall", "F1-score"]
+
+    for column in metric_columns:
+        if column in display_df.columns:
+            display_df[column] = (display_df[column] * 100).round(2)
+
+    return display_df
+
+
+def set_quick_sample(sample_name):
+    """
+    Put a quick test sample into the text box.
+    """
+    st.session_state["news_text"] = QUICK_SAMPLES[sample_name]
+
+
+def render_sidebar():
+    """
+    Create the sidebar navigation and controls.
+    """
+    st.sidebar.title("NewsSort AI")
+    st.sidebar.caption("NLP News Category Classifier")
+
+    page = st.sidebar.radio(
+        "Navigation",
+        [
+            "Predict News Category",
+            "Multi-Model Comparison",
+            "Model Evaluation Results",
+            "About System",
+        ],
     )
 
-    st.title("NewsSort AI")
-    st.subheader("News Category Classification System Using NLP")
+    st.sidebar.divider()
+    selected_model_name = st.sidebar.selectbox(
+        "Primary Model",
+        list(MODEL_PATHS.keys()),
+    )
 
+    st.sidebar.divider()
+    st.sidebar.write("Quick Test Samples")
+    sample_cols = st.sidebar.columns(2)
+    sample_names = list(QUICK_SAMPLES.keys())
+    for index, sample_name in enumerate(sample_names):
+        with sample_cols[index % 2]:
+            st.button(
+                sample_name,
+                use_container_width=True,
+                on_click=set_quick_sample,
+                args=(sample_name,),
+            )
+
+    st.sidebar.divider()
+    st.sidebar.write("Pipeline Details")
+    st.sidebar.caption("Dataset: BBC News")
+    st.sidebar.caption("Input column: content")
+    st.sidebar.caption("Label column: category")
+    st.sidebar.caption("Vectorizer: Word + Character TF-IDF")
+    st.sidebar.caption("Models: SVM, Logistic Regression, Naive Bayes")
+
+    return page, selected_model_name
+
+
+def render_news_input():
+    """
+    Render shared news text input area.
+    """
+    if "news_text" not in st.session_state:
+        st.session_state["news_text"] = ""
+
+    return st.text_area(
+        "News Article Input",
+        key="news_text",
+        height=220,
+        placeholder="Type or paste news text here. Example: Apple launches new artificial intelligence features for iPhone users...",
+    )
+
+
+def render_score_breakdown(score_df, score_label, selected_model_name):
+    """
+    Show score/probability table and chart for one selected model.
+    """
+    st.subheader("Confidence / Score Breakdown")
+
+    if score_label == "Probability":
+        display_scores = score_df.copy()
+        display_scores["Probability"] = (display_scores["Probability"] * 100).round(2)
+        st.dataframe(
+            display_scores,
+            column_config={
+                "Probability": st.column_config.NumberColumn(
+                    "Probability",
+                    format="%.2f%%",
+                ),
+            },
+            hide_index=True,
+            use_container_width=True,
+        )
+        st.bar_chart(display_scores.set_index("Category"), y="Probability")
+        st.caption(f"{selected_model_name} chooses the category with the highest probability.")
+    else:
+        display_scores = score_df.copy()
+        display_scores["Decision score"] = display_scores["Decision score"].round(4)
+        st.dataframe(display_scores, hide_index=True, use_container_width=True)
+        st.bar_chart(display_scores.set_index("Category"), y="Decision score")
+        st.caption(
+            f"{selected_model_name} chooses the category with the strongest decision score. "
+            "For SVM, this is a decision score rather than a true probability."
+        )
+
+
+def render_detected_terms(detected_terms):
+    """
+    Show important TF-IDF signals found in the input text.
+    """
+    if not detected_terms:
+        return
+
+    st.subheader("Detected TF-IDF Signals")
+    st.write(", ".join(detected_terms))
+    st.caption("These are strong text signals detected after TF-IDF feature extraction.")
+
+
+def render_predict_page(selected_model_name):
+    """
+    Single-model prediction page.
+    """
+    st.title("News Article Classifier")
     st.write(
         "Enter a news title or article text below. "
         "The system will predict whether it belongs to business, entertainment, politics, sport, or tech."
     )
 
-    with st.form("prediction_form", border=True):
-        selected_model_name = st.selectbox(
-            "Choose prediction model",
-            list(MODEL_PATHS.keys()),
-        )
+    news_text = render_news_input()
+    col1, col2 = st.columns([1, 1])
+    predict_clicked = col1.button("Predict Category", type="primary", use_container_width=True)
+    clear_clicked = col2.button("Clear Input", use_container_width=True)
 
-        st.info(f"Current prediction model: Word + Character TF-IDF + {selected_model_name}")
+    if clear_clicked:
+        st.session_state["news_text"] = ""
+        st.rerun()
 
-        news_text = st.text_area(
-            "News text",
-            height=180,
-            placeholder="Example: Apple launches new artificial intelligence features for iPhone users...",
-        )
-
-        submitted = st.form_submit_button("Predict category", icon=":material/search:")
-
-    if submitted:
-        if not news_text.strip():
-            st.warning("Please enter some news text first.")
+    if predict_clicked:
+        if len(news_text.split()) < 10:
+            st.warning("Please enter at least 10 words so the model has enough text to classify.")
             return
 
         prediction = predict_category(news_text, selected_model_name)
         score_df, detected_terms, score_label = explain_prediction(news_text, selected_model_name)
-        st.success(f"Predicted Category: {prediction.title()}")
+        top_score = get_top_score(score_df, score_label)
+
+        st.success(f"Predicted Category: {prediction.title()} ({score_label}: {top_score})")
 
         with st.container(border=True):
-            st.subheader("Prediction details")
-            if score_label == "Probability":
-                display_scores = score_df.copy()
-                display_scores["Probability"] = (display_scores["Probability"] * 100).round(2)
-                st.dataframe(
-                    display_scores,
-                    column_config={
-                        "Probability": st.column_config.NumberColumn(
-                            "Probability",
-                            format="%.2f%%",
-                        ),
-                    },
-                    hide_index=True,
-                )
-                chart_df = display_scores.set_index("Category")
-                st.bar_chart(chart_df, y="Probability")
-                st.caption(f"{selected_model_name} chooses the category with the highest probability.")
-            else:
-                display_scores = score_df.copy()
-                display_scores["Decision score"] = display_scores["Decision score"].round(4)
-                st.dataframe(display_scores, hide_index=True)
-                chart_df = display_scores.set_index("Category")
-                st.bar_chart(chart_df, y="Decision score")
-                st.caption(f"{selected_model_name} chooses the category with the strongest decision score.")
-
-            if detected_terms:
-                st.write("Detected TF-IDF signals:")
-                st.write(", ".join(detected_terms))
+            render_score_breakdown(score_df, score_label, selected_model_name)
+            render_detected_terms(detected_terms)
 
         st.caption(
             "Note: This prototype is for academic demonstration only. "
             "It predicts a category based on patterns learned from the training dataset."
         )
 
-    st.divider()
-    st.subheader("Model Comparison")
+
+def render_multi_model_page():
+    """
+    Show all model predictions for the same input text.
+    """
+    st.title("Live Multi-Model Prediction Comparison")
+    st.write("Use this page to compare how all three trained models classify the same news text.")
+
+    news_text = render_news_input()
+    col1, col2 = st.columns([1, 1])
+    compare_clicked = col1.button("Compare All Models", type="primary", use_container_width=True)
+    clear_clicked = col2.button("Clear Input", use_container_width=True)
+
+    if clear_clicked:
+        st.session_state["news_text"] = ""
+        st.rerun()
+
+    if compare_clicked:
+        if len(news_text.split()) < 10:
+            st.warning("Please enter at least 10 words so the models have enough text to classify.")
+            return
+
+        comparison_df = load_model_comparison()
+        best_model = get_best_model(comparison_df)
+        best_model_name = best_model[0] if best_model else None
+
+        prediction_rows = []
+        for model_name in MODEL_PATHS:
+            prediction = predict_category(news_text, model_name)
+            score_df, _, score_label = explain_prediction(news_text, model_name)
+            top_score = get_top_score(score_df, score_label)
+
+            if model_name == best_model_name:
+                status = "Best model by F1-score"
+            else:
+                status = "Prediction agreement"
+
+            prediction_rows.append(
+                {
+                    "Model": model_name,
+                    "Prediction": prediction.title(),
+                    "Score Type": score_label,
+                    "Top Score": top_score,
+                    "Status": status,
+                }
+            )
+
+        prediction_df = pd.DataFrame(prediction_rows)
+        most_common_prediction = prediction_df["Prediction"].mode()[0]
+        prediction_df.loc[
+            prediction_df["Prediction"] != most_common_prediction,
+            "Status",
+        ] = "Different prediction"
+
+        st.subheader("Model Prediction Cards")
+        model_cols = st.columns(3)
+        for index, row in prediction_df.iterrows():
+            with model_cols[index]:
+                st.metric(
+                    label=row["Model"],
+                    value=row["Prediction"],
+                    delta=row["Top Score"],
+                )
+                st.caption(row["Status"])
+
+        st.subheader("Comparison Table")
+        st.dataframe(prediction_df, hide_index=True, use_container_width=True)
+        st.caption(
+            "Different prediction does not automatically mean wrong. "
+            "For new user input, the real category is unknown unless manually checked."
+        )
+
+
+def render_evaluation_page():
+    """
+    Show benchmark evaluation metrics from training/testing.
+    """
+    st.title("Benchmark Evaluation Metrics")
+    st.write(
+        "This page shows model performance calculated from the testing split of the BBC News dataset. "
+        "These values are not calculated from one user input."
+    )
 
     comparison_df = load_model_comparison()
     if comparison_df is None:
         st.warning("Model comparison file not found. Please run the training scripts first.")
-    else:
-        best_model = get_best_model(comparison_df)
-        if best_model is not None:
-            best_model_name, best_f1_score = best_model
-            st.success(f"Best model: {best_model_name} with F1-score {(best_f1_score * 100):.2f}%")
+        return
 
-        display_df = comparison_df.copy()
-        metric_columns = ["Accuracy", "Precision", "Recall", "F1-score"]
+    best_model = get_best_model(comparison_df)
+    if best_model is not None:
+        best_model_name, best_f1_score = best_model
+        st.success(f"Best model: {best_model_name} with F1-score {(best_f1_score * 100):.2f}%")
 
-        for column in metric_columns:
-            if column in display_df.columns:
-                display_df[column] = (display_df[column] * 100).round(2)
+    display_df = prepare_metrics_table(comparison_df)
+    st.dataframe(display_df, hide_index=True, use_container_width=True)
+    st.caption("Accuracy, precision, recall, and F1-score are shown as percentages.")
 
-        st.dataframe(display_df, hide_index=True)
-        st.caption("Scores are shown as percentages.")
-
-    with st.expander("About this system"):
+    with st.expander("What do these metrics mean?"):
         st.write(
             """
-            NewsSort AI uses Natural Language Processing to classify news text.
-
-            Current workflow:
-            1. Clean the news text.
-            2. Convert text into numerical features using word and character TF-IDF.
-            3. Train and compare Support Vector Machine, Logistic Regression and Multinomial Naive Bayes.
-            4. Allow users to choose between all three trained models.
+            - Accuracy shows the overall percentage of correct predictions.
+            - Precision shows how many predicted categories are actually correct.
+            - Recall shows how many real category items are successfully detected.
+            - F1-score balances precision and recall into one score.
+            - CV F1-score comes from cross-validation during model tuning.
             """
         )
+
+
+def render_about_page():
+    """
+    Explain the system workflow.
+    """
+    st.title("About NewsSort AI")
+    st.write(
+        """
+        NewsSort AI is an NLP-based news category classification prototype.
+        It classifies news text into five categories: business, entertainment, politics, sport, and tech.
+        """
+    )
+
+    st.subheader("System Workflow")
+    st.write(
+        """
+        1. Load the BBC News dataset.
+        2. Use the `content` column as input text.
+        3. Use the `category` column as the target label.
+        4. Clean the news text by converting it to lowercase and removing unnecessary symbols.
+        5. Convert the text into numerical features using word and character TF-IDF.
+        6. Train Support Vector Machine, Logistic Regression, and Multinomial Naive Bayes.
+        7. Compare the models using accuracy, precision, recall, and F1-score.
+        8. Use the trained models inside the Streamlit prototype.
+        """
+    )
+
+    st.subheader("Academic Note")
+    st.info(
+        "This system is for academic demonstration only. "
+        "The prediction is based on patterns learned from the BBC News dataset."
+    )
+
+
+def main():
+    st.set_page_config(
+        page_title="NewsSort AI",
+        page_icon="N",
+        layout="wide",
+    )
+
+    page, selected_model_name = render_sidebar()
+
+    if page == "Predict News Category":
+        render_predict_page(selected_model_name)
+    elif page == "Multi-Model Comparison":
+        render_multi_model_page()
+    elif page == "Model Evaluation Results":
+        render_evaluation_page()
+    else:
+        render_about_page()
 
 
 if __name__ == "__main__":
