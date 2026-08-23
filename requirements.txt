@@ -3,6 +3,8 @@ numpy
 scikit-learn
 streamlit
 joblib
+deep-translator
+langdetect
 matplotlib
 seaborn
 jupyter

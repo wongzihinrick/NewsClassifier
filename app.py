@@ -7,6 +7,14 @@ import pandas as pd
 import streamlit as st
 from sklearn.naive_bayes import ComplementNB
 
+from translation_utils import (
+    detect_input_language,
+    get_bilingual_category_label,
+    get_translation_languages,
+    prepare_text_for_prediction,
+    translate_text,
+)
+
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 MODEL_PATHS = {
@@ -15,6 +23,7 @@ MODEL_PATHS = {
     "Complement Naive Bayes": PROJECT_ROOT / "models" / "complement_naive_bayes_model.pkl",
 }
 RESULTS_PATH = PROJECT_ROOT / "results" / "model_comparison.csv"
+PRIMARY_MODEL_NAME = "Support Vector Machine"
 
 QUICK_SAMPLES = {
     "Tech": "Apple announced new artificial intelligence features for mobile devices, software developers, and cloud technology users.",
@@ -22,6 +31,7 @@ QUICK_SAMPLES = {
     "Politics": "The government announced a new policy after parliament debated election reform and public service funding.",
     "Sport": "The football team won the final match after the player scored a late goal in the tournament.",
     "Entertainment": "The actor received an award at the film festival after the movie became popular with audiences.",
+    "Chinese Tech": "苹果宣布为移动设备、软件开发者和云技术用户推出新的人工智能功能。",
 }
 
 
@@ -191,6 +201,45 @@ def clean_text(text):
     return text.strip()
 
 
+def render_translation_panel(original_text, classifier_text, translate_language):
+    """
+    Show original and translated news text for bilingual review.
+    """
+    st.subheader("Translation")
+
+    with st.container(border=True):
+        detected_language = detect_input_language(original_text)
+        if detected_language == "Unknown":
+            st.write("Detected Language: Auto-detected by translation engine")
+        else:
+            st.write(f"Detected Language: {detected_language}")
+
+        st.write("Original Text")
+        st.write(original_text)
+
+        translated_display_text = translate_text(original_text, translate_language)
+        st.write(f"{translate_language} Translation")
+        st.write(translated_display_text)
+
+        if detected_language == translate_language:
+            st.caption(f"The input is already in {translate_language}, so no extra translation was needed.")
+
+
+def has_enough_news_text(news_text):
+    """
+    Validate both space-separated and non-space-separated news text.
+    """
+    cleaned_text = str(news_text).strip()
+    if not cleaned_text:
+        return False
+
+    if len(cleaned_text.split()) >= 10:
+        return True
+
+    compact_text = re.sub(r"\s+", "", cleaned_text)
+    return len(compact_text) >= 30
+
+
 @st.cache_resource
 def load_model(model_name, model_path_string):
     """
@@ -329,6 +378,15 @@ def set_quick_sample(sample_name):
     Put a quick test sample into the text box.
     """
     st.session_state["news_text"] = QUICK_SAMPLES[sample_name]
+    clear_prediction_results()
+
+
+def clear_prediction_results():
+    """
+    Clear saved prediction results when the input changes intentionally.
+    """
+    st.session_state.pop("single_prediction_result", None)
+    st.session_state.pop("multi_prediction_result", None)
 
 
 def render_sidebar():
@@ -351,7 +409,25 @@ def render_sidebar():
     st.sidebar.divider()
     selected_model_name = st.sidebar.selectbox(
         "Primary Model",
-        list(MODEL_PATHS.keys()),
+        [PRIMARY_MODEL_NAME],
+    )
+
+    st.sidebar.divider()
+    st.sidebar.write("Language")
+    translation_languages = list(get_translation_languages().keys())
+    default_language_index = (
+        translation_languages.index("Chinese")
+        if "Chinese" in translation_languages
+        else 0
+    )
+    translate_language = st.sidebar.selectbox(
+        "Translate Language",
+        translation_languages,
+        index=default_language_index,
+    )
+    show_translation = st.sidebar.checkbox(
+        "Show translated news text",
+        value=True,
     )
 
     st.sidebar.divider()
@@ -375,7 +451,7 @@ def render_sidebar():
     st.sidebar.caption("Vectorizer: Word + Character TF-IDF")
     st.sidebar.caption("Models: SVM, Logistic Regression, Naive Bayes")
 
-    return page, selected_model_name
+    return page, selected_model_name, translate_language, show_translation
 
 
 def render_news_input():
@@ -447,7 +523,99 @@ def render_detected_terms(detected_terms):
     st.caption("These are strong text signals detected after TF-IDF feature extraction.")
 
 
-def render_predict_page(selected_model_name):
+def render_single_prediction_result(result, translate_language, show_translation):
+    """
+    Render a saved single-model prediction result in the current display language.
+    """
+    top_score = get_top_score(result["score_df"], result["score_label"])
+    category_label = get_bilingual_category_label(result["prediction"], translate_language)
+
+    st.success(
+        f"Predicted Category: {category_label} "
+        f"({result['score_label']}: {top_score})"
+    )
+
+    if show_translation:
+        try:
+            render_translation_panel(
+                result["news_text"],
+                result["classifier_text"],
+                translate_language,
+            )
+        except RuntimeError as error:
+            st.warning(str(error))
+
+    with st.container(border=True):
+        render_score_breakdown(
+            result["score_df"],
+            result["score_label"],
+            result["selected_model_name"],
+        )
+        render_detected_terms(result["detected_terms"])
+
+    st.caption(
+        "Note: This prototype is for academic demonstration only. "
+        "It predicts a category based on patterns learned from the training dataset."
+    )
+
+
+def render_multi_prediction_result(result, translate_language, show_translation):
+    """
+    Render saved multi-model prediction results in the current display language.
+    """
+    prediction_rows = []
+    for row in result["prediction_rows"]:
+        prediction_rows.append(
+            {
+                "Model": row["Model"],
+                "Prediction": get_bilingual_category_label(
+                    row["Prediction"],
+                    translate_language,
+                ),
+                "Score Type": row["Score Type"],
+                "Top Score": row["Top Score"],
+                "Status": row["Status"],
+            }
+        )
+
+    prediction_df = pd.DataFrame(prediction_rows)
+    most_common_prediction = prediction_df["Prediction"].mode()[0]
+    prediction_df.loc[
+        prediction_df["Prediction"] != most_common_prediction,
+        "Status",
+    ] = "Different prediction"
+
+    st.subheader("Model Prediction Cards")
+    model_cols = st.columns(3)
+    for index, row in prediction_df.iterrows():
+        with model_cols[index]:
+            st.metric(
+                label=row["Model"],
+                value=row["Prediction"],
+                delta=row["Top Score"],
+            )
+            st.caption(row["Status"])
+
+    st.subheader("Comparison Table")
+    st.dataframe(prediction_df, hide_index=True, use_container_width=True)
+
+    if show_translation:
+        try:
+            render_translation_panel(
+                result["news_text"],
+                result["classifier_text"],
+                translate_language,
+            )
+        except RuntimeError as error:
+            st.warning(str(error))
+
+    st.caption(
+        "Different prediction does not automatically mean wrong. "
+        "For new user input, the real category is unknown unless manually checked."
+    )
+
+
+def render_predict_page(selected_model_name, translate_language, show_translation):
     """
     Single-model prediction page.
     """
@@ -463,39 +631,44 @@ def render_predict_page(selected_model_name):
     col2.button("Clear Input",use_container_width=True,on_click=clear_news_input,)
 
     if predict_clicked:
-        if len(news_text.split()) < 10:
-            st.warning("Please enter at least 10 words so the model has enough text to classify.")
+        if not has_enough_news_text(news_text):
+            st.warning("Please enter a longer news text so the model has enough detail to classify.")
             return
 
         try:
-            prediction = predict_category(news_text, selected_model_name)
+            classifier_text = prepare_text_for_prediction(news_text)
+            prediction = predict_category(classifier_text, selected_model_name)
             score_df, detected_terms, score_label = explain_prediction(
-                news_text,
+                classifier_text,
                 selected_model_name,
             )
-        except (FileNotFoundError, KeyError, ValueError) as error:
+        except (FileNotFoundError, KeyError, ValueError, RuntimeError) as error:
             st.error(f"Prediction failed: {error}")
             return
-        top_score = get_top_score(score_df, score_label)
+        st.session_state["single_prediction_result"] = {
+            "news_text": news_text,
+            "classifier_text": classifier_text,
+            "selected_model_name": selected_model_name,
+            "prediction": prediction,
+            "score_df": score_df,
+            "detected_terms": detected_terms,
+            "score_label": score_label,
+        }
 
-        st.success(f"Predicted Category: {prediction.title()} ({score_label}: {top_score})")
-
-        with st.container(border=True):
-            render_score_breakdown(score_df, score_label, selected_model_name)
-            render_detected_terms(detected_terms)
-
-        st.caption(
-            "Note: This prototype is for academic demonstration only. "
-            "It predicts a category based on patterns learned from the training dataset."
-        )
+    result = st.session_state.get("single_prediction_result")
+    if result and result["news_text"] == news_text:
+        render_single_prediction_result(result, translate_language, show_translation)
+    elif result:
+        clear_prediction_results()
 
 def clear_news_input():
     """
     Clear the shared news input before Streamlit renders the widget.
     """
     st.session_state["news_text"] = ""
+    clear_prediction_results()
 
-def render_multi_model_page():
+def render_multi_model_page(translate_language, show_translation):
     """
     Show all model predictions for the same input text.
     """
@@ -508,8 +681,14 @@ def render_multi_model_page():
     col2.button("Clear Input",use_container_width=True,on_click=clear_news_input,)
 
     if compare_clicked:
-        if len(news_text.split()) < 10:
-            st.warning("Please enter at least 10 words so the models have enough text to classify.")
+        if not has_enough_news_text(news_text):
+            st.warning("Please enter a longer news text so the models have enough detail to classify.")
+            return
+
+        try:
+            classifier_text = prepare_text_for_prediction(news_text)
+        except RuntimeError as error:
+            st.error(f"Translation failed: {error}")
             return
 
         comparison_df = load_model_comparison()
@@ -518,8 +697,8 @@ def render_multi_model_page():
 
         prediction_rows = []
         for model_name in MODEL_PATHS:
-            prediction = predict_category(news_text, model_name)
-            score_df, _, score_label = explain_prediction(news_text, model_name)
+            prediction = predict_category(classifier_text, model_name)
+            score_df, _, score_label = explain_prediction(classifier_text, model_name)
             top_score = get_top_score(score_df, score_label)
 
             if model_name == best_model_name:
@@ -530,37 +709,24 @@ def render_multi_model_page():
             prediction_rows.append(
                 {
                     "Model": model_name,
-                    "Prediction": prediction.title(),
+                    "Prediction": prediction,
                     "Score Type": score_label,
                     "Top Score": top_score,
                     "Status": status,
                 }
             )
 
-        prediction_df = pd.DataFrame(prediction_rows)
-        most_common_prediction = prediction_df["Prediction"].mode()[0]
-        prediction_df.loc[
-            prediction_df["Prediction"] != most_common_prediction,
-            "Status",
-        ] = "Different prediction"
+        st.session_state["multi_prediction_result"] = {
+            "news_text": news_text,
+            "classifier_text": classifier_text,
+            "prediction_rows": prediction_rows,
+        }
 
-        st.subheader("Model Prediction Cards")
-        model_cols = st.columns(3)
-        for index, row in prediction_df.iterrows():
-            with model_cols[index]:
-                st.metric(
-                    label=row["Model"],
-                    value=row["Prediction"],
-                    delta=row["Top Score"],
-                )
-                st.caption(row["Status"])
-
-        st.subheader("Comparison Table")
-        st.dataframe(prediction_df, hide_index=True, use_container_width=True)
-        st.caption(
-            "Different prediction does not automatically mean wrong. "
-            "For new user input, the real category is unknown unless manually checked."
-        )
+    result = st.session_state.get("multi_prediction_result")
+    if result and result["news_text"] == news_text:
+        render_multi_prediction_result(result, translate_language, show_translation)
+    elif result:
+        clear_prediction_results()
 
 
 def render_evaluation_page():
@@ -640,12 +806,21 @@ def main():
     )
     apply_black_purple_theme()
 
-    page, selected_model_name = render_sidebar()
+    (
+        page,
+        selected_model_name,
+        translate_language,
+        show_translation,
+    ) = render_sidebar()
 
     if page == "Predict News Category":
-        render_predict_page(selected_model_name)
+        render_predict_page(
+            selected_model_name,
+            translate_language,
+            show_translation,
+        )
     elif page == "Multi-Model Comparison":
-        render_multi_model_page()
+        render_multi_model_page(translate_language, show_translation)
     elif page == "Model Evaluation Results":
         render_evaluation_page()
     else:
