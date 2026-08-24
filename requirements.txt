@@ -8,3 +8,5 @@ langdetect
 matplotlib
 seaborn
 jupyter
+requests
+trafilatura

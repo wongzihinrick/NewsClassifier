@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+from article_extraction import extract_article_from_url
 from translation_utils import (
     detect_input_language,
     get_bilingual_category_label,
@@ -333,6 +334,9 @@ def get_prediction_strength(score_df):
 
 def set_quick_sample(sample_name):
     st.session_state["news_text"] = QUICK_SAMPLES[sample_name]
+    st.session_state["input_method"] = "Paste text"
+    st.session_state.pop("article_url", None)
+    st.session_state.pop("article_source", None)
     clear_prediction_result()
 
 
@@ -342,6 +346,8 @@ def clear_prediction_result():
 
 def clear_news_input():
     st.session_state["news_text"] = ""
+    st.session_state["article_url"] = ""
+    st.session_state.pop("article_source", None)
     clear_prediction_result()
 
 
@@ -394,15 +400,73 @@ def render_sidebar():
     return page, translate_language, show_translation
 
 
-def render_news_input():
+def render_article_source_info():
+    article_source = st.session_state.get("article_source")
+    if not article_source:
+        return
+
+    st.success("Article text extracted successfully. You can edit the text below before classifying.")
+    source_cols = st.columns(3)
+    source_cols[0].metric("Extracted Words", article_source.get("word_count", 0))
+    source_cols[1].metric("Source Domain", article_source.get("domain", "-"))
+    source_cols[2].metric("Source Type", "URL")
+
+    if article_source.get("title"):
+        st.caption(f"Article title: {article_source['title']}")
+
+
+def render_url_input():
+    if "article_url" not in st.session_state:
+        st.session_state["article_url"] = ""
+
+    st.text_input(
+        "News Article URL",
+        key="article_url",
+        placeholder="Paste a news article link here, for example https://www.bbc.com/news/...",
+    )
+
+    extract_clicked = st.button(
+        "Extract Article Text",
+        type="primary",
+        use_container_width=True,
+    )
+
+    if extract_clicked:
+        if not st.session_state["article_url"].strip():
+            st.warning("Please paste a news article URL first.")
+            return
+
+        with st.spinner("Reading article from the link..."):
+            extraction_result = extract_article_from_url(st.session_state["article_url"])
+
+        if not extraction_result.success:
+            st.error(extraction_result.error)
+            st.info("If the website blocks extraction, paste the article text manually instead.")
+            return
+
+        st.session_state["news_text"] = extraction_result.text
+        st.session_state["article_source"] = {
+            "title": extraction_result.title,
+            "domain": extraction_result.domain,
+            "final_url": extraction_result.final_url,
+            "word_count": extraction_result.word_count,
+        }
+        clear_prediction_result()
+
+
+def render_news_input(input_method):
     if "news_text" not in st.session_state:
         st.session_state["news_text"] = ""
 
+    if input_method == "Article URL":
+        render_url_input()
+        render_article_source_info()
+
     return st.text_area(
-        "News Article Input",
+        "News Article Text",
         key="news_text",
         height=220,
-        placeholder="Type or paste news text here. Example: Apple launches new artificial intelligence features for iPhone users...",
+        placeholder="Type or paste news text here, or use the URL option above to extract article text.",
     )
 
 
@@ -472,10 +536,17 @@ def render_prediction_result(result, translate_language, show_translation):
 def render_classify_page(translate_language, show_translation):
     st.title("News Article Classifier")
     st.write(
-        "Paste a news title or article text below. The system will classify it as business, entertainment, politics, sport, or technology."
+        "Paste news text or extract it from an article link. The system will classify it as business, entertainment, politics, sport, or technology."
     )
 
-    news_text = render_news_input()
+    input_method = st.radio(
+        "Input Method",
+        ["Paste text", "Article URL"],
+        key="input_method",
+        horizontal=True,
+    )
+
+    news_text = render_news_input(input_method)
     word_count, character_count = get_text_stats(news_text)
 
     stat_cols = st.columns(2)
