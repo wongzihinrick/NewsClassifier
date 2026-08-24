@@ -5,7 +5,6 @@ import joblib
 import numpy as np
 import pandas as pd
 import streamlit as st
-from sklearn.naive_bayes import ComplementNB
 
 from translation_utils import (
     detect_input_language,
@@ -17,13 +16,35 @@ from translation_utils import (
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-MODEL_PATHS = {
-    "Support Vector Machine": PROJECT_ROOT / "models" / "svm_model.pkl",
-    "Logistic Regression": PROJECT_ROOT / "models" / "logistic_regression_model.pkl",
-    "Complement Naive Bayes": PROJECT_ROOT / "models" / "complement_naive_bayes_model.pkl",
+SVM_MODEL_PATH = PROJECT_ROOT / "models" / "svm_model.pkl"
+
+CATEGORIES = {
+    "business": {
+        "label": "Business",
+        "description": "Company news, economy, finance, stock market, sales, profit, or industry growth.",
+        "examples": "market growth, bank profit, company sales, investors, trade",
+    },
+    "entertainment": {
+        "label": "Entertainment",
+        "description": "Movies, music, celebrities, television, awards, festivals, or cultural events.",
+        "examples": "film award, actor, singer, music festival, movie release",
+    },
+    "politics": {
+        "label": "Politics",
+        "description": "Government, elections, public policy, ministers, parliament, laws, or political leaders.",
+        "examples": "election campaign, new policy, minister speech, parliament debate",
+    },
+    "sport": {
+        "label": "Sport",
+        "description": "Matches, teams, players, scores, tournaments, racing, coaching, or competitions.",
+        "examples": "football match, final score, player goal, league tournament",
+    },
+    "tech": {
+        "label": "Technology",
+        "description": "Software, internet, artificial intelligence, devices, mobile phones, and digital innovation.",
+        "examples": "AI feature, mobile app, software update, cloud platform",
+    },
 }
-RESULTS_PATH = PROJECT_ROOT / "results" / "model_comparison.csv"
-PRIMARY_MODEL_NAME = "Support Vector Machine"
 
 QUICK_SAMPLES = {
     "Tech": "Apple announced new artificial intelligence features for mobile devices, software developers, and cloud technology users.",
@@ -31,35 +52,35 @@ QUICK_SAMPLES = {
     "Politics": "The government announced a new policy after parliament debated election reform and public service funding.",
     "Sport": "The football team won the final match after the player scored a late goal in the tournament.",
     "Entertainment": "The actor received an award at the film festival after the movie became popular with audiences.",
-    "Chinese Tech": "苹果宣布为移动设备、软件开发者和云技术用户推出新的人工智能功能。",
 }
 
 
 def apply_black_purple_theme():
-    """
-    Apply a consistent black and purple dashboard theme.
-    """
     st.markdown(
         """
         <style>
             :root {
                 --app-bg: #0B0B12;
                 --sidebar-bg: #111827;
-                --card-bg: #151522;
-                --card-bg-soft: #1E1B2E;
-                --primary-purple: #8B5CF6;
-                --primary-purple-dark: #7C3AED;
-                --primary-purple-soft: #A78BFA;
+                --panel-bg: #151522;
+                --panel-soft: #1E1B2E;
+                --purple: #8B5CF6;
+                --purple-dark: #7C3AED;
+                --purple-soft: #C4B5FD;
                 --text-main: #F8FAFC;
                 --text-muted: #A1A1AA;
                 --border: #2D2A3D;
-                --success: #22C55E;
-                --warning: #F87171;
+                --success-bg: #12291F;
+                --success-border: #22C55E;
             }
 
             .stApp {
                 background: var(--app-bg);
                 color: var(--text-main);
+            }
+
+            [data-testid="stHeader"] {
+                background: var(--app-bg);
             }
 
             h1, h2, h3, h4, h5, h6, p, label, span, div {
@@ -82,35 +103,15 @@ def apply_black_purple_theme():
             }
 
             [data-testid="stSidebar"] .stCaptionContainer,
-            [data-testid="stSidebar"] small {
+            [data-testid="stSidebar"] small,
+            .stCaptionContainer {
                 color: var(--text-muted);
-            }
-
-            [data-testid="stSidebar"] button {
-                background: var(--card-bg-soft);
-                color: var(--text-main);
-                border: 1px solid var(--border);
-                border-radius: 10px;
-            }
-
-            [data-testid="stSidebar"] button:hover {
-                background: var(--primary-purple);
-                color: #FFFFFF;
-                border-color: var(--primary-purple);
-            }
-
-            div[data-testid="stForm"],
-            div[data-testid="stVerticalBlockBorderWrapper"] {
-                background: var(--card-bg);
-                border: 1px solid var(--border);
-                border-radius: 16px;
-                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
             }
 
             textarea,
             input,
             [data-baseweb="select"] > div {
-                background: var(--card-bg-soft) !important;
+                background: var(--panel-soft) !important;
                 color: var(--text-main) !important;
                 border-color: var(--border) !important;
             }
@@ -122,30 +123,30 @@ def apply_black_purple_theme():
 
             textarea:focus,
             input:focus {
-                border-color: var(--primary-purple) !important;
-                box-shadow: 0 0 0 1px var(--primary-purple) !important;
+                border-color: var(--purple) !important;
+                box-shadow: 0 0 0 1px var(--purple) !important;
             }
 
             .stButton > button {
-                border-radius: 10px;
-                border: 1px solid var(--primary-purple);
-                background: var(--primary-purple);
+                border-radius: 8px;
+                border: 1px solid var(--purple);
+                background: var(--purple);
                 color: #FFFFFF;
-                font-weight: 600;
+                font-weight: 700;
             }
 
             .stButton > button:hover {
-                background: var(--primary-purple-dark);
+                background: var(--purple-dark);
+                border-color: var(--purple-dark);
                 color: #FFFFFF;
-                border-color: var(--primary-purple-dark);
             }
 
-            [data-testid="stMetric"] {
-                background: var(--card-bg);
+            [data-testid="stMetric"],
+            div[data-testid="stVerticalBlockBorderWrapper"] {
+                background: var(--panel-bg);
                 border: 1px solid var(--border);
-                border-radius: 16px;
-                padding: 18px;
-                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+                border-radius: 8px;
+                box-shadow: none;
             }
 
             [data-testid="stMetricLabel"] p {
@@ -154,36 +155,46 @@ def apply_black_purple_theme():
             }
 
             [data-testid="stMetricValue"] {
-                color: var(--primary-purple-soft);
+                color: var(--purple-soft);
             }
 
             [data-testid="stDataFrame"] {
-                background: var(--card-bg);
-                border-radius: 14px;
+                background: var(--panel-bg);
+                border-radius: 8px;
             }
 
             .stAlert {
-                border-radius: 12px;
+                border-radius: 8px;
             }
 
             hr {
                 border-color: var(--border);
             }
 
-            .stCaptionContainer {
-                color: var(--text-muted);
+            .category-card {
+                background: var(--panel-bg);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 18px;
+                min-height: 150px;
             }
 
-            .stSelectbox [data-baseweb="select"] svg {
-                color: var(--text-main);
+            .result-card {
+                background: var(--success-bg);
+                border: 1px solid var(--success-border);
+                border-radius: 8px;
+                padding: 20px;
+                margin-top: 18px;
             }
 
-            [data-testid="stRadio"] label {
-                color: var(--text-main);
+            .result-card h2 {
+                margin: 0 0 8px 0;
+                color: #DCFCE7;
             }
 
-            [data-testid="stHeader"] {
-                background: var(--app-bg);
+            .result-card p {
+                margin-bottom: 0;
+                color: #BBF7D0;
             }
         </style>
         """,
@@ -192,249 +203,183 @@ def apply_black_purple_theme():
 
 
 def clean_text(text):
-    """
-    Clean the input news text using the same style as the training file.
-    """
     text = str(text).lower()
     text = re.sub(r"[^a-z\s]", " ", text)
     text = re.sub(r"\s+", " ", text)
     return text.strip()
 
 
-def render_translation_panel(original_text, classifier_text, translate_language):
-    """
-    Show original and translated news text for bilingual review.
-    """
-    st.subheader("Translation")
-
-    with st.container(border=True):
-        detected_language = detect_input_language(original_text)
-        if detected_language == "Unknown":
-            st.write("Detected Language: Auto-detected by translation engine")
-        else:
-            st.write(f"Detected Language: {detected_language}")
-
-        st.write("Original Text")
-        st.write(original_text)
-
-        translated_display_text = translate_text(original_text, translate_language)
-        st.write(f"{translate_language} Translation")
-        st.write(translated_display_text)
-
-        if detected_language == translate_language:
-            st.caption(f"The input is already in {translate_language}, so no extra translation was needed.")
-
-
 def has_enough_news_text(news_text):
-    """
-    Validate both space-separated and non-space-separated news text.
-    """
-    cleaned_text = str(news_text).strip()
-    if not cleaned_text:
+    text = str(news_text).strip()
+    if not text:
         return False
 
-    if len(cleaned_text.split()) >= 10:
+    if len(text.split()) >= 10:
         return True
 
-    compact_text = re.sub(r"\s+", "", cleaned_text)
+    compact_text = re.sub(r"\s+", "", text)
     return len(compact_text) >= 30
 
 
+def get_text_stats(news_text):
+    text = str(news_text).strip()
+    words = re.findall(r"\b\w+\b", text)
+    return len(words), len(text)
+
+
 @st.cache_resource
-def load_model(model_name, model_path_string):
-    """
-    Load and cache one selected model pipeline.
-    """
-    model_path = Path(model_path_string)
-    if not model_path.exists():
-        raise FileNotFoundError(
-            f"The model file for {model_name} was not found: {model_path}"
-        )
+def load_news_classifier():
+    if not SVM_MODEL_PATH.exists():
+        raise FileNotFoundError(f"Model file not found: {SVM_MODEL_PATH}")
 
-    return joblib.load(model_path)
-
-
-@st.cache_data
-def load_model_comparison():
-    """
-    Load model comparison results if the file exists.
-    """
-    try:
-        return pd.read_csv(RESULTS_PATH)
-    except FileNotFoundError:
-        return None
-
-
-def get_best_model(comparison_df):
-    """
-    Return the model with the highest F1-score from the comparison results.
-    """
-    if comparison_df is None or comparison_df.empty or "F1-score" not in comparison_df.columns:
-        return None
-
-    best_row = comparison_df.sort_values("F1-score", ascending=False).iloc[0]
-    return best_row["Model"], best_row["F1-score"]
+    return joblib.load(SVM_MODEL_PATH)
 
 
 def get_model_parts(model):
-    """
-    Return the feature extractor and classifier from a saved model.
-    """
     return model.named_steps["features"], model.named_steps["model"]
 
 
-def predict_category(news_text, selected_model_name):
-    """
-    Predict the category of the news text using the selected model.
-    """
-    model_path = MODEL_PATHS[selected_model_name]
-    model = load_model(selected_model_name, str(model_path))
+def predict_with_details(news_text):
+    model = load_news_classifier()
     cleaned_text = clean_text(news_text)
-    return model.predict([cleaned_text])[0]
-
-
-def explain_prediction(news_text, selected_model_name):
-    """
-    Return model scores and detected TF-IDF terms for the input text.
-    """
-    model_path = MODEL_PATHS[selected_model_name]
-    model = load_model(selected_model_name, str(model_path))
-    cleaned_text = clean_text(news_text)
+    prediction = model.predict([cleaned_text])[0]
     feature_extractor, classifier = get_model_parts(model)
-
     text_features = feature_extractor.transform([cleaned_text])
 
-    if isinstance(classifier, ComplementNB):
-        complement_scores = text_features @ classifier.feature_log_prob_.T
-        raw_scores = np.asarray(complement_scores).ravel()
-        score_range = raw_scores.max() - raw_scores.min()
-        if score_range > 0:
-            raw_scores = (raw_scores - raw_scores.min()) / score_range * 100
-        else:
-            raw_scores = np.zeros_like(raw_scores)
-        score_label = "Relative score"
-    elif hasattr(classifier, "predict_proba"):
-        raw_scores = classifier.predict_proba(text_features)[0]
-        score_label = "Probability"
+    decision_scores = classifier.decision_function(text_features)[0]
+    score_df = build_category_match_table(classifier.classes_, decision_scores)
+    key_terms = get_key_terms_for_prediction(
+        feature_extractor,
+        classifier,
+        text_features,
+        prediction,
+    )
+
+    return prediction, score_df, key_terms
+
+
+def build_category_match_table(classes, decision_scores):
+    scores = np.asarray(decision_scores, dtype=float)
+    min_score = scores.min()
+    max_score = scores.max()
+
+    if max_score == min_score:
+        relative_scores = np.full_like(scores, 100 / len(scores), dtype=float)
     else:
-        raw_scores = classifier.decision_function(text_features)[0]
-        score_label = "Decision score"
+        relative_scores = (scores - min_score) / (max_score - min_score) * 100
 
     score_df = pd.DataFrame(
         {
-            "Category": classifier.classes_,
-            score_label: raw_scores,
+            "Category": [
+                CATEGORIES.get(str(category), {}).get("label", str(category).title())
+                for category in classes
+            ],
+            "Category Match": relative_scores.round(2),
         }
-    ).sort_values(score_label, ascending=False)
+    ).sort_values("Category Match", ascending=False)
 
-    feature_names = feature_extractor.get_feature_names_out()
-    feature_row = text_features.tocsr()[0]
-    top_feature_indices = feature_row.indices[feature_row.data.argsort()[::-1]][:10]
-    detected_terms = [
-        feature_names[index]
-        .replace("word_tfidf__", "")
-        .replace("char_tfidf__", "")
-        for index in top_feature_indices
-    ]
-
-    return score_df, detected_terms, score_label
+    return score_df
 
 
-def get_top_score(score_df, score_label):
-    """
-    Convert the top model score into a display-friendly value.
-    """
-    top_row = score_df.iloc[0]
-    top_value = top_row[score_label]
+def get_key_terms_for_prediction(feature_extractor, classifier, text_features, prediction):
+    try:
+        feature_names = feature_extractor.get_feature_names_out()
+        class_index = list(classifier.classes_).index(prediction)
+        coefficients = classifier.coef_[class_index]
+        contribution_values = text_features.multiply(coefficients).tocsr()[0]
+    except (AttributeError, ValueError, IndexError):
+        return []
 
-    if score_label == "Probability":
-        return f"{top_value * 100:.2f}%"
+    if contribution_values.nnz == 0:
+        return []
 
-    if score_label == "Relative score":
-        return f"{top_value:.2f}/100"
+    sorted_positions = contribution_values.data.argsort()[::-1]
+    terms = []
 
-    return f"{top_value:.4f}"
+    for position in sorted_positions:
+        feature_index = contribution_values.indices[position]
+        contribution = contribution_values.data[position]
+        if contribution <= 0:
+            continue
+
+        term = (
+            feature_names[feature_index]
+            .replace("word_tfidf__", "")
+            .replace("char_tfidf__", "")
+            .strip()
+        )
+        if len(term) < 3 or term in terms:
+            continue
+
+        terms.append(term)
+        if len(terms) == 8:
+            break
+
+    return terms
 
 
-def prepare_metrics_table(comparison_df):
-    """
-    Format model evaluation metrics as percentages for display.
-    """
-    if comparison_df is None:
-        return None
+def get_prediction_strength(score_df):
+    scores = score_df["Category Match"].tolist()
+    if len(scores) < 2:
+        return "Moderate"
 
-    display_df = comparison_df.copy()
-    metric_columns = ["Accuracy", "Precision", "Recall", "F1-score"]
-
-    for column in metric_columns:
-        if column in display_df.columns:
-            display_df[column] = (display_df[column] * 100).round(2)
-
-    return display_df
+    gap = scores[0] - scores[1]
+    if gap >= 40:
+        return "Strong"
+    if gap >= 20:
+        return "Moderate"
+    return "Low"
 
 
 def set_quick_sample(sample_name):
-    """
-    Put a quick test sample into the text box.
-    """
     st.session_state["news_text"] = QUICK_SAMPLES[sample_name]
-    clear_prediction_results()
+    clear_prediction_result()
 
 
-def clear_prediction_results():
-    """
-    Clear saved prediction results when the input changes intentionally.
-    """
-    st.session_state.pop("single_prediction_result", None)
-    st.session_state.pop("multi_prediction_result", None)
+def clear_prediction_result():
+    st.session_state.pop("prediction_result", None)
+
+
+def clear_news_input():
+    st.session_state["news_text"] = ""
+    clear_prediction_result()
 
 
 def render_sidebar():
-    """
-    Create the sidebar navigation and controls.
-    """
     st.sidebar.title("NewsSort AI")
     st.sidebar.caption("NLP News Category Classifier")
 
     page = st.sidebar.radio(
         "Navigation",
         [
-            "Predict News Category",
-            "Multi-Model Comparison",
-            "Model Evaluation Results",
+            "Classify News",
+            "Category Guide",
             "About System",
         ],
-    )
-
-    st.sidebar.divider()
-    selected_model_name = st.sidebar.selectbox(
-        "Primary Model",
-        [PRIMARY_MODEL_NAME],
     )
 
     st.sidebar.divider()
     st.sidebar.write("Language")
     translation_languages = list(get_translation_languages().keys())
     default_language_index = (
-        translation_languages.index("Chinese")
-        if "Chinese" in translation_languages
+        translation_languages.index("English")
+        if "English" in translation_languages
         else 0
     )
     translate_language = st.sidebar.selectbox(
-        "Translate Language",
+        "Display Language",
         translation_languages,
         index=default_language_index,
     )
     show_translation = st.sidebar.checkbox(
-        "Show translated news text",
-        value=True,
+        "Show translated article",
+        value=False,
     )
 
     st.sidebar.divider()
     st.sidebar.write("Quick Test Samples")
     sample_cols = st.sidebar.columns(2)
-    sample_names = list(QUICK_SAMPLES.keys())
-    for index, sample_name in enumerate(sample_names):
+    for index, sample_name in enumerate(QUICK_SAMPLES):
         with sample_cols[index % 2]:
             st.button(
                 sample_name,
@@ -444,20 +389,12 @@ def render_sidebar():
             )
 
     st.sidebar.divider()
-    st.sidebar.write("Pipeline Details")
-    st.sidebar.caption("Dataset: BBC News")
-    st.sidebar.caption("Input column: content")
-    st.sidebar.caption("Label column: category")
-    st.sidebar.caption("Vectorizer: Word + Character TF-IDF")
-    st.sidebar.caption("Models: SVM, Logistic Regression, Naive Bayes")
+    st.sidebar.caption("Categories: Business, Entertainment, Politics, Sport, Technology")
 
-    return page, selected_model_name, translate_language, show_translation
+    return page, translate_language, show_translation
 
 
 def render_news_input():
-    """
-    Render shared news text input area.
-    """
     if "news_text" not in st.session_state:
         st.session_state["news_text"] = ""
 
@@ -469,332 +406,187 @@ def render_news_input():
     )
 
 
-def render_score_breakdown(score_df, score_label, selected_model_name):
-    """
-    Show score/probability table and chart for one selected model.
-    """
-    st.subheader("Confidence / Score Breakdown")
+def render_translation_panel(original_text, translate_language):
+    detected_language = detect_input_language(original_text)
+    translated_display_text = translate_text(original_text, translate_language)
 
-    if score_label == "Probability":
-        display_scores = score_df.copy()
-        display_scores["Probability"] = (display_scores["Probability"] * 100).round(2)
-        st.dataframe(
-            display_scores,
-            column_config={
-                "Probability": st.column_config.NumberColumn(
-                    "Probability",
-                    format="%.2f%%",
-                ),
-            },
-            hide_index=True,
-            use_container_width=True,
-        )
-        st.bar_chart(display_scores.set_index("Category"), y="Probability")
-        st.caption(f"{selected_model_name} chooses the category with the highest probability.")
-    elif score_label == "Relative score":
-        display_scores = score_df.copy()
-        display_scores["Relative score"] = display_scores["Relative score"].round(2)
-        st.dataframe(display_scores, hide_index=True, use_container_width=True)
-        st.bar_chart(display_scores.set_index("Category"), y="Relative score")
-        st.caption(
-            "Complement Naive Bayes scores are scaled from 0 to 100 for this input. "
-            "They compare the categories but are not probabilities or calibrated confidence."
-        )
+    with st.expander("Translated article", expanded=False):
+        st.write(f"Detected language: {detected_language}")
+        st.write(f"{translate_language} translation")
+        st.write(translated_display_text)
+
+
+def render_prediction_result(result, translate_language, show_translation):
+    category = result["prediction"]
+    category_label = get_bilingual_category_label(category, translate_language)
+    category_info = CATEGORIES.get(str(category).lower(), {})
+    strength = get_prediction_strength(result["score_df"])
+
+    st.markdown(
+        f"""
+        <div class="result-card">
+            <h2>Predicted Category: {category_label}</h2>
+            <p>Prediction strength: {strength}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.subheader("Why this category?")
+    if category_info:
+        st.write(category_info["description"])
+
+    if result["key_terms"]:
+        st.write("Key terms found in the article:")
+        st.write(", ".join(result["key_terms"]))
     else:
-        display_scores = score_df.copy()
-        display_scores["Decision score"] = display_scores["Decision score"].round(4)
-        st.dataframe(display_scores, hide_index=True, use_container_width=True)
-        st.bar_chart(display_scores.set_index("Category"), y="Decision score")
-        st.caption(
-            f"{selected_model_name} chooses the category with the strongest decision score. "
-            "For SVM, this is a decision score rather than a true probability."
-        )
+        st.caption("No strong keyword signals were found, but the full text pattern was still used for classification.")
 
-
-def render_detected_terms(detected_terms):
-    """
-    Show important TF-IDF signals found in the input text.
-    """
-    if not detected_terms:
-        return
-
-    st.subheader("Detected TF-IDF Signals")
-    st.write(", ".join(detected_terms))
-    st.caption("These are strong text signals detected after TF-IDF feature extraction.")
-
-
-def render_single_prediction_result(result, translate_language, show_translation):
-    """
-    Render a saved single-model prediction result in the current display language.
-    """
-    top_score = get_top_score(result["score_df"], result["score_label"])
-    category_label = get_bilingual_category_label(result["prediction"], translate_language)
-
-    st.success(
-        f"Predicted Category: {category_label} "
-        f"({result['score_label']}: {top_score})"
+    st.subheader("Category Match")
+    st.dataframe(
+        result["score_df"],
+        column_config={
+            "Category Match": st.column_config.ProgressColumn(
+                "Category Match",
+                help="A relative match score for this input. It is not the model's training accuracy.",
+                format="%.2f%%",
+                min_value=0,
+                max_value=100,
+            )
+        },
+        hide_index=True,
+        use_container_width=True,
     )
 
     if show_translation:
         try:
-            render_translation_panel(
-                result["news_text"],
-                result["classifier_text"],
-                translate_language,
-            )
-        except RuntimeError as error:
-            st.warning(str(error))
-
-    with st.container(border=True):
-        render_score_breakdown(
-            result["score_df"],
-            result["score_label"],
-            result["selected_model_name"],
-        )
-        render_detected_terms(result["detected_terms"])
-
-    st.caption(
-        "Note: This prototype is for academic demonstration only. "
-        "It predicts a category based on patterns learned from the training dataset."
-    )
-
-
-def render_multi_prediction_result(result, translate_language, show_translation):
-    """
-    Render saved multi-model prediction results in the current display language.
-    """
-    prediction_rows = []
-    for row in result["prediction_rows"]:
-        prediction_rows.append(
-            {
-                "Model": row["Model"],
-                "Prediction": get_bilingual_category_label(
-                    row["Prediction"],
-                    translate_language,
-                ),
-                "Score Type": row["Score Type"],
-                "Top Score": row["Top Score"],
-                "Status": row["Status"],
-            }
-        )
-
-    prediction_df = pd.DataFrame(prediction_rows)
-    most_common_prediction = prediction_df["Prediction"].mode()[0]
-    prediction_df.loc[
-        prediction_df["Prediction"] != most_common_prediction,
-        "Status",
-    ] = "Different prediction"
-
-    st.subheader("Model Prediction Cards")
-    model_cols = st.columns(3)
-    for index, row in prediction_df.iterrows():
-        with model_cols[index]:
-            st.metric(
-                label=row["Model"],
-                value=row["Prediction"],
-                delta=row["Top Score"],
-            )
-            st.caption(row["Status"])
-
-    st.subheader("Comparison Table")
-    st.dataframe(prediction_df, hide_index=True, use_container_width=True)
-
-    if show_translation:
-        try:
-            render_translation_panel(
-                result["news_text"],
-                result["classifier_text"],
-                translate_language,
-            )
+            render_translation_panel(result["original_text"], translate_language)
         except RuntimeError as error:
             st.warning(str(error))
 
     st.caption(
-        "Different prediction does not automatically mean wrong. "
-        "For new user input, the real category is unknown unless manually checked."
+        "Academic note: this prototype predicts a category based on patterns learned from the BBC News dataset."
     )
 
 
-def render_predict_page(selected_model_name, translate_language, show_translation):
-    """
-    Single-model prediction page.
-    """
+def render_classify_page(translate_language, show_translation):
     st.title("News Article Classifier")
     st.write(
-        "Enter a news title or article text below. "
-        "The system will predict whether it belongs to business, entertainment, politics, sport, or tech."
+        "Paste a news title or article text below. The system will classify it as business, entertainment, politics, sport, or technology."
     )
 
     news_text = render_news_input()
-    col1, col2 = st.columns([1, 1])
-    predict_clicked = col1.button("Predict Category", type="primary", use_container_width=True)
-    col2.button("Clear Input",use_container_width=True,on_click=clear_news_input,)
+    word_count, character_count = get_text_stats(news_text)
 
-    if predict_clicked:
+    stat_cols = st.columns(2)
+    stat_cols[0].metric("Word Count", word_count)
+    stat_cols[1].metric("Character Count", character_count)
+
+    button_cols = st.columns([1, 1])
+    classify_clicked = button_cols[0].button(
+        "Classify News",
+        type="primary",
+        use_container_width=True,
+    )
+    button_cols[1].button(
+        "Clear Input",
+        use_container_width=True,
+        on_click=clear_news_input,
+    )
+
+    if classify_clicked:
         if not has_enough_news_text(news_text):
-            st.warning("Please enter a longer news text so the model has enough detail to classify.")
+            st.warning("Please enter at least 10 words so the system has enough detail to classify.")
             return
 
         try:
-            classifier_text = prepare_text_for_prediction(news_text)
-            prediction = predict_category(classifier_text, selected_model_name)
-            score_df, detected_terms, score_label = explain_prediction(
-                classifier_text,
-                selected_model_name,
-            )
+            with st.spinner("Classifying news article..."):
+                classifier_text = prepare_text_for_prediction(news_text)
+                prediction, score_df, key_terms = predict_with_details(classifier_text)
         except (FileNotFoundError, KeyError, ValueError, RuntimeError) as error:
             st.error(f"Prediction failed: {error}")
             return
-        st.session_state["single_prediction_result"] = {
-            "news_text": news_text,
+
+        st.session_state["prediction_result"] = {
+            "original_text": news_text,
             "classifier_text": classifier_text,
-            "selected_model_name": selected_model_name,
             "prediction": prediction,
             "score_df": score_df,
-            "detected_terms": detected_terms,
-            "score_label": score_label,
+            "key_terms": key_terms,
         }
 
-    result = st.session_state.get("single_prediction_result")
-    if result and result["news_text"] == news_text:
-        render_single_prediction_result(result, translate_language, show_translation)
+    result = st.session_state.get("prediction_result")
+    if result and result["original_text"] == news_text:
+        render_prediction_result(result, translate_language, show_translation)
     elif result:
-        clear_prediction_results()
-
-def clear_news_input():
-    """
-    Clear the shared news input before Streamlit renders the widget.
-    """
-    st.session_state["news_text"] = ""
-    clear_prediction_results()
-
-def render_multi_model_page(translate_language, show_translation):
-    """
-    Show all model predictions for the same input text.
-    """
-    st.title("Live Multi-Model Prediction Comparison")
-    st.write("Use this page to compare how all three trained models classify the same news text.")
-
-    news_text = render_news_input()
-    col1, col2 = st.columns([1, 1])
-    compare_clicked = col1.button("Compare All Models", type="primary", use_container_width=True)
-    col2.button("Clear Input",use_container_width=True,on_click=clear_news_input,)
-
-    if compare_clicked:
-        if not has_enough_news_text(news_text):
-            st.warning("Please enter a longer news text so the models have enough detail to classify.")
-            return
-
-        try:
-            classifier_text = prepare_text_for_prediction(news_text)
-        except RuntimeError as error:
-            st.error(f"Translation failed: {error}")
-            return
-
-        comparison_df = load_model_comparison()
-        best_model = get_best_model(comparison_df)
-        best_model_name = best_model[0] if best_model else None
-
-        prediction_rows = []
-        for model_name in MODEL_PATHS:
-            prediction = predict_category(classifier_text, model_name)
-            score_df, _, score_label = explain_prediction(classifier_text, model_name)
-            top_score = get_top_score(score_df, score_label)
-
-            if model_name == best_model_name:
-                status = "Best model by F1-score"
-            else:
-                status = "Prediction agreement"
-
-            prediction_rows.append(
-                {
-                    "Model": model_name,
-                    "Prediction": prediction,
-                    "Score Type": score_label,
-                    "Top Score": top_score,
-                    "Status": status,
-                }
-            )
-
-        st.session_state["multi_prediction_result"] = {
-            "news_text": news_text,
-            "classifier_text": classifier_text,
-            "prediction_rows": prediction_rows,
-        }
-
-    result = st.session_state.get("multi_prediction_result")
-    if result and result["news_text"] == news_text:
-        render_multi_prediction_result(result, translate_language, show_translation)
-    elif result:
-        clear_prediction_results()
+        clear_prediction_result()
 
 
-def render_evaluation_page():
-    """
-    Show benchmark evaluation metrics from training/testing.
-    """
-    st.title("Benchmark Evaluation Metrics")
-    st.write(
-        "This page shows model performance calculated from the testing split of the BBC News dataset. "
-        "These values are not calculated from one user input."
+def render_category_guide_page():
+    st.title("Category Guide")
+    st.write("Use this guide to understand what each news category means.")
+
+    rows = [
+        ("business", "entertainment"),
+        ("politics", "sport"),
+        ("tech",),
+    ]
+
+    for row in rows:
+        cols = st.columns(len(row))
+        for column, category_key in zip(cols, row):
+            category = CATEGORIES[category_key]
+            with column:
+                st.markdown(
+                    f"""
+                    <div class="category-card">
+                        <h3>{category["label"]}</h3>
+                        <p>{category["description"]}</p>
+                        <p><strong>Typical words:</strong> {category["examples"]}</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+    st.info(
+        "For better results, paste at least one full paragraph instead of only one or two words."
     )
-
-    comparison_df = load_model_comparison()
-    if comparison_df is None:
-        st.warning("Model comparison file not found. Please run the training scripts first.")
-        return
-
-    best_model = get_best_model(comparison_df)
-    if best_model is not None:
-        best_model_name, best_f1_score = best_model
-        st.success(f"Best model: {best_model_name} with F1-score {(best_f1_score * 100):.2f}%")
-
-    display_df = prepare_metrics_table(comparison_df)
-    st.dataframe(display_df, hide_index=True, use_container_width=True)
-    st.caption("Accuracy, precision, recall, and F1-score are shown as percentages.")
-
-    with st.expander("What do these metrics mean?"):
-        st.write(
-            """
-            - Accuracy shows the overall percentage of correct predictions.
-            - Precision shows how many predicted categories are actually correct.
-            - Recall shows how many real category items are successfully detected.
-            - F1-score balances precision and recall into one score.
-            - CV F1-score comes from cross-validation during model tuning.
-            """
-        )
 
 
 def render_about_page():
-    """
-    Explain the system workflow.
-    """
     st.title("About NewsSort AI")
     st.write(
         """
-        NewsSort AI is an NLP-based news category classification prototype.
-        It classifies news text into five categories: business, entertainment, politics, sport, and tech.
+        NewsSort AI is an academic NLP prototype that classifies news articles into five categories:
+        business, entertainment, politics, sport, and technology.
         """
     )
 
-    st.subheader("System Workflow")
+    st.subheader("How the system works")
     st.write(
         """
-        1. Load the BBC News dataset.
-        2. Use the `content` column as input text.
-        3. Use the `category` column as the target label.
-        4. Clean the news text by converting it to lowercase and removing unnecessary symbols.
-        5. Convert the text into numerical features using word and character TF-IDF.
-        6. Train Support Vector Machine, Logistic Regression, and Complement Naive Bayes.
-        7. Compare the models using accuracy, precision, recall, and F1-score.
-        8. Use the trained models inside the Streamlit prototype.
+        1. The user pastes a news title or article.
+        2. The system cleans the text and prepares it for classification.
+        3. The trained classifier predicts the most suitable news category.
+        4. The app shows the category, related key terms, and a relative category match table.
         """
     )
 
-    st.subheader("Academic Note")
-    st.info(
-        "This system is for academic demonstration only. "
-        "The prediction is based on patterns learned from the BBC News dataset."
+    st.subheader("Dataset and backend evaluation")
+    st.write(
+        """
+        The project uses the BBC News dataset for training and testing. During backend development,
+        several classification approaches were trained and compared using accuracy, precision, recall,
+        and F1-score. The best-performing approach is used in this user-facing prototype.
+        """
+    )
+
+    st.subheader("Limitation")
+    st.write(
+        """
+        The system is trained on BBC-style news data, so it may be less accurate for very short text,
+        mixed-topic articles, informal social media posts, or news topics outside the training categories.
+        """
     )
 
 
@@ -806,23 +598,12 @@ def main():
     )
     apply_black_purple_theme()
 
-    (
-        page,
-        selected_model_name,
-        translate_language,
-        show_translation,
-    ) = render_sidebar()
+    page, translate_language, show_translation = render_sidebar()
 
-    if page == "Predict News Category":
-        render_predict_page(
-            selected_model_name,
-            translate_language,
-            show_translation,
-        )
-    elif page == "Multi-Model Comparison":
-        render_multi_model_page(translate_language, show_translation)
-    elif page == "Model Evaluation Results":
-        render_evaluation_page()
+    if page == "Classify News":
+        render_classify_page(translate_language, show_translation)
+    elif page == "Category Guide":
+        render_category_guide_page()
     else:
         render_about_page()
 
