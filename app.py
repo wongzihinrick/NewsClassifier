@@ -11,7 +11,6 @@ import streamlit.components.v1 as components
 from article_extraction import extract_article_from_url
 from news_features import (
     generate_core_takeaways,
-    generate_news_card_image,
     render_tts_player,
 )
 from translation_utils import (
@@ -625,34 +624,6 @@ def render_prediction_result(result, translate_language, show_translation):
 
     tts_content = " ".join(takeaways) if takeaways else result["original_text"][:250]
     render_tts_player(tts_content, label="🔊 Listen to 3-Sentence Core Takeaways")
-
-    with st.expander("🖼️ Generate & Download Shareable News Card", expanded=False):
-        card_cols = st.columns([2, 1])
-        article_source = st.session_state.get("article_source", {})
-        title_text = article_source.get("title") or result["original_text"][:60] + "..."
-        domain_name = article_source.get("domain") or "NewsSort AI Input"
-
-        with card_cols[0]:
-            card_img_buf = generate_news_card_image(
-                title=title_text,
-                category_name=category_label,
-                strength=strength,
-                takeaways=takeaways,
-                key_terms=result.get("key_terms", []),
-                source_domain=domain_name,
-            )
-            st.image(card_img_buf, caption="Shareable News Card Preview", use_container_width=True)
-
-        with card_cols[1]:
-            st.write("### 📲 Share & Export")
-            st.caption("Card includes AI predicted category, confidence strength, 3-sentence summary, and key signal terms.")
-            st.download_button(
-                label="📥 Download Card Image (PNG)",
-                data=card_img_buf.getvalue(),
-                file_name=f"news_card_{category}_{int(datetime.now().timestamp())}.png",
-                mime="image/png",
-                use_container_width=True,
-            )
 
     st.subheader("Why this category?")
     if category_info:
