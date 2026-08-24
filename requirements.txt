@@ -10,3 +10,4 @@ seaborn
 jupyter
 requests
 trafilatura
+pillow

@@ -47,8 +47,8 @@ CATEGORY_TRANSLATIONS = {
 }
 
 TRANSLATION_LANGUAGE_OPTIONS = [
-    "Malay",
     "English",
+    "Malay",
     "Chinese (Simplified)",
     "Chinese (Traditional)",
     "Tamil",

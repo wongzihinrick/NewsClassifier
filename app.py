@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from pathlib import Path
 
 import joblib
@@ -8,6 +9,11 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from article_extraction import extract_article_from_url
+from news_features import (
+    generate_core_takeaways,
+    generate_news_card_image,
+    render_tts_player,
+)
 from translation_utils import (
     TRANSLATION_LANGUAGE_OPTIONS,
     detect_input_language,
@@ -197,6 +203,33 @@ def apply_black_purple_theme():
             .result-card p {
                 margin-bottom: 0;
                 color: #BBF7D0;
+            }
+
+            .takeaways-card {
+                background: linear-gradient(135deg, #181428 0%, #151522 100%);
+                border: 1px solid #3F3366;
+                border-left: 4px solid var(--purple);
+                border-radius: 8px;
+                padding: 16px 20px;
+                margin: 16px 0;
+            }
+
+            .takeaways-card h4 {
+                margin: 0 0 10px 0;
+                color: var(--purple-soft);
+                font-size: 16px;
+                font-weight: 700;
+            }
+
+            .takeaway-point {
+                background: #1F1A33;
+                border: 1px solid #362D55;
+                border-radius: 6px;
+                padding: 10px 14px;
+                margin-bottom: 8px;
+                color: #E2E8F0;
+                font-size: 14px;
+                line-height: 1.5;
             }
         </style>
         """,
@@ -450,7 +483,7 @@ def render_sidebar():
     translate_language = st.sidebar.selectbox(
         "Translate Language",
         TRANSLATION_LANGUAGE_OPTIONS,
-        index=2,
+        index=0,
     )
     show_translation = st.sidebar.checkbox(
         "Show translated article",
@@ -563,6 +596,7 @@ def render_prediction_result(result, translate_language, show_translation):
     category_label = get_bilingual_category_label(category, translate_language)
     category_info = CATEGORIES.get(str(category).lower(), {})
     strength = get_prediction_strength(result["score_df"])
+    takeaways = result.get("takeaways", [])
 
     st.markdown(
         f"""
@@ -573,6 +607,52 @@ def render_prediction_result(result, translate_language, show_translation):
         """,
         unsafe_allow_html=True,
     )
+
+    if takeaways:
+        st.markdown(
+            """
+            <div class="takeaways-card">
+                <h4>📝 3-Sentence Core Takeaways</h4>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        for point in takeaways:
+            st.markdown(
+                f'<div class="takeaway-point">{point}</div>',
+                unsafe_allow_html=True,
+            )
+
+    tts_content = " ".join(takeaways) if takeaways else result["original_text"][:250]
+    render_tts_player(tts_content, label="🔊 Listen to 3-Sentence Core Takeaways")
+
+    with st.expander("🖼️ Generate & Download Shareable News Card", expanded=False):
+        card_cols = st.columns([2, 1])
+        article_source = st.session_state.get("article_source", {})
+        title_text = article_source.get("title") or result["original_text"][:60] + "..."
+        domain_name = article_source.get("domain") or "NewsSort AI Input"
+
+        with card_cols[0]:
+            card_img_buf = generate_news_card_image(
+                title=title_text,
+                category_name=category_label,
+                strength=strength,
+                takeaways=takeaways,
+                key_terms=result.get("key_terms", []),
+                source_domain=domain_name,
+            )
+            st.image(card_img_buf, caption="Shareable News Card Preview", use_container_width=True)
+
+        with card_cols[1]:
+            st.write("### 📲 Share & Export")
+            st.caption("Card includes AI predicted category, confidence strength, 3-sentence summary, and key signal terms.")
+            st.download_button(
+                label="📥 Download Card Image (PNG)",
+                data=card_img_buf.getvalue(),
+                file_name=f"news_card_{category}_{int(datetime.now().timestamp())}.png",
+                mime="image/png",
+                use_container_width=True,
+            )
 
     st.subheader("Why this category?")
     if category_info:
@@ -648,17 +728,20 @@ def render_classify_page(translate_language, show_translation):
             with st.spinner("Classifying news article..."):
                 classifier_text = prepare_text_for_prediction(news_text)
                 prediction, score_df, key_terms = predict_with_details(classifier_text)
+                takeaways = generate_core_takeaways(news_text, max_points=3)
         except (FileNotFoundError, KeyError, ValueError, RuntimeError) as error:
             st.error(f"Prediction failed: {error}")
             return
 
-        st.session_state["prediction_result"] = {
+        pred_result = {
             "original_text": news_text,
             "classifier_text": classifier_text,
             "prediction": prediction,
             "score_df": score_df,
             "key_terms": key_terms,
+            "takeaways": takeaways,
         }
+        st.session_state["prediction_result"] = pred_result
 
     result = st.session_state.get("prediction_result")
     if result and result["original_text"] == news_text:
