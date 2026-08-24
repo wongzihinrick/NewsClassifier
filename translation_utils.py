@@ -7,155 +7,82 @@ CATEGORY_TRANSLATIONS = {
     "business": {
         "English": "Business",
         "Arabic": "الأعمال",
-        "Chinese": "商业",
-        "French": "Affaires",
-        "German": "Wirtschaft",
-        "Hindi": "व्यापार",
-        "Indonesian": "Bisnis",
-        "Japanese": "ビジネス",
-        "Korean": "비즈니스",
+        "Chinese (Simplified)": "商业",
+        "Chinese (Traditional)": "商業",
         "Malay": "Perniagaan",
-        "Portuguese": "Negócios",
-        "Russian": "Бизнес",
-        "Spanish": "Negocios",
         "Tamil": "வணிகம்",
     },
     "entertainment": {
         "English": "Entertainment",
         "Arabic": "الترفيه",
-        "Chinese": "娱乐",
-        "French": "Divertissement",
-        "German": "Unterhaltung",
-        "Hindi": "मनोरंजन",
-        "Indonesian": "Hiburan",
-        "Japanese": "エンタメ",
-        "Korean": "엔터테인먼트",
+        "Chinese (Simplified)": "娱乐",
+        "Chinese (Traditional)": "娛樂",
         "Malay": "Hiburan",
-        "Portuguese": "Entretenimento",
-        "Russian": "Развлечения",
-        "Spanish": "Entretenimiento",
         "Tamil": "பொழுதுபோக்கு",
     },
     "politics": {
         "English": "Politics",
         "Arabic": "السياسة",
-        "Chinese": "政治",
-        "French": "Politique",
-        "German": "Politik",
-        "Hindi": "राजनीति",
-        "Indonesian": "Politik",
-        "Japanese": "政治",
-        "Korean": "정치",
+        "Chinese (Simplified)": "政治",
+        "Chinese (Traditional)": "政治",
         "Malay": "Politik",
-        "Portuguese": "Política",
-        "Russian": "Политика",
-        "Spanish": "Política",
         "Tamil": "அரசியல்",
     },
     "sport": {
         "English": "Sport",
         "Arabic": "الرياضة",
-        "Chinese": "体育",
-        "French": "Sport",
-        "German": "Sport",
-        "Hindi": "खेल",
-        "Indonesian": "Olahraga",
-        "Japanese": "スポーツ",
-        "Korean": "스포츠",
+        "Chinese (Simplified)": "体育",
+        "Chinese (Traditional)": "體育",
         "Malay": "Sukan",
-        "Portuguese": "Esporte",
-        "Russian": "Спорт",
-        "Spanish": "Deportes",
         "Tamil": "விளையாட்டு",
     },
     "tech": {
         "English": "Tech",
         "Arabic": "التقنية",
-        "Chinese": "科技",
-        "French": "Technologie",
-        "German": "Technologie",
-        "Hindi": "तकनीक",
-        "Indonesian": "Teknologi",
-        "Japanese": "テクノロジー",
-        "Korean": "기술",
+        "Chinese (Simplified)": "科技",
+        "Chinese (Traditional)": "科技",
         "Malay": "Teknologi",
-        "Portuguese": "Tecnologia",
-        "Russian": "Технологии",
-        "Spanish": "Tecnología",
         "Tamil": "தொழில்நுட்பம்",
     },
 }
 
+TRANSLATION_LANGUAGE_OPTIONS = [
+    "Malay",
+    "English",
+    "Chinese (Simplified)",
+    "Chinese (Traditional)",
+    "Tamil",
+    "Arabic",
+]
+
 FALLBACK_LANGUAGE_CODES = {
-    "Afrikaans": "af",
     "Arabic": "ar",
-    "Bengali": "bn",
-    "Chinese": "zh-CN",
-    "Dutch": "nl",
+    "Chinese (Simplified)": "zh-CN",
+    "Chinese (Traditional)": "zh-TW",
     "English": "en",
-    "French": "fr",
-    "German": "de",
-    "Hindi": "hi",
-    "Indonesian": "id",
-    "Italian": "it",
-    "Japanese": "ja",
-    "Korean": "ko",
     "Malay": "ms",
-    "Portuguese": "pt",
-    "Russian": "ru",
-    "Spanish": "es",
     "Tamil": "ta",
-    "Thai": "th",
-    "Vietnamese": "vi",
 }
 
 DETECTED_LANGUAGE_NAMES = {
-    "af": "Afrikaans",
     "ar": "Arabic",
-    "bn": "Bengali",
-    "de": "German",
     "en": "English",
-    "es": "Spanish",
-    "fr": "French",
-    "hi": "Hindi",
-    "id": "Indonesian",
-    "it": "Italian",
-    "ja": "Japanese",
-    "ko": "Korean",
-    "nl": "Dutch",
-    "pt": "Portuguese",
-    "ru": "Russian",
-    "th": "Thai",
-    "tl": "Filipino",
-    "tr": "Turkish",
-    "vi": "Vietnamese",
-    "zh": "Chinese",
-    "zh-cn": "Chinese",
-    "zh-tw": "Chinese",
+    "zh": "Chinese (Simplified)",
+    "zh-cn": "Chinese (Simplified)",
+    "zh-tw": "Chinese (Traditional)",
     "ms": "Malay",
     "ta": "Tamil",
 }
 
 MYMEMORY_LANGUAGE_CODES = {
     "ar": "ar-SA",
-    "de": "de-DE",
     "en": "en-US",
-    "es": "es-ES",
-    "fr": "fr-FR",
-    "hi": "hi-IN",
-    "id": "id-ID",
-    "it": "it-IT",
-    "ja": "ja-JP",
-    "ko": "ko-KR",
     "ms": "ms-MY",
-    "pt": "pt-PT",
-    "ru": "ru-RU",
     "ta": "ta-IN",
-    "th": "th-TH",
-    "vi": "vi-VN",
     "zh-CN": "zh-CN",
     "zh-TW": "zh-TW",
 }
+MAX_TRANSLATION_CHARS = 1000
 
 
 def get_category_label(category, language):
@@ -192,7 +119,13 @@ def translate_category_label(english_label, target_language):
         return english_label
 
     target_code = get_language_code(target_language)
-    translated_label = try_google_translate(english_label, target_code, ["auto", "en"])
+    translated_label = try_google_translate(
+        english_label,
+        target_code,
+        ["auto", "en"],
+        source_language="English",
+        target_language=target_language,
+    )
 
     if not translated_label:
         return english_label
@@ -203,23 +136,9 @@ def translate_category_label(english_label, target_language):
 @st.cache_data(show_spinner=False)
 def get_translation_languages():
     """
-    Return all target languages supported by Google Translate.
+    Return only the target languages supported by this app.
     """
-    try:
-        from deep_translator import GoogleTranslator
-    except ImportError:
-        return FALLBACK_LANGUAGE_CODES
-
-    supported_languages = GoogleTranslator().get_supported_languages(as_dict=True)
-    language_codes = {
-        language_name.title(): language_code
-        for language_name, language_code in supported_languages.items()
-    }
-
-    if "Chinese (Simplified)" in language_codes:
-        language_codes["Chinese"] = language_codes["Chinese (Simplified)"]
-
-    return dict(sorted(language_codes.items()))
+    return FALLBACK_LANGUAGE_CODES
 
 
 def get_language_code(language):
@@ -229,7 +148,13 @@ def get_language_code(language):
     return get_translation_languages().get(language, FALLBACK_LANGUAGE_CODES.get(language, "en"))
 
 
-def try_google_translate(text, target_code, source_codes):
+def try_google_translate(
+    text,
+    target_code,
+    source_codes,
+    source_language=None,
+    target_language=None,
+):
     """
     Try Google Translate first, then MyMemory for common language pairs.
     """
@@ -244,7 +169,11 @@ def try_google_translate(text, target_code, source_codes):
         except Exception:
             continue
 
-        if translated_text and not is_bad_translation_result(translated_text):
+        if (
+            translated_text
+            and not is_bad_translation_result(translated_text)
+            and not has_untranslated_source_text(text, translated_text, source_language, target_language)
+        ):
             return translated_text
 
     mymemory_target_code = MYMEMORY_LANGUAGE_CODES.get(target_code)
@@ -272,7 +201,11 @@ def try_google_translate(text, target_code, source_codes):
         except Exception:
             continue
 
-        if translated_text and not is_bad_translation_result(translated_text):
+        if (
+            translated_text
+            and not is_bad_translation_result(translated_text)
+            and not has_untranslated_source_text(text, translated_text, source_language, target_language)
+        ):
             return translated_text
 
     return None
@@ -291,6 +224,89 @@ def is_bad_translation_result(translated_text):
         "no translation was found",
     ]
     return any(signal in normalized_text for signal in error_signals)
+
+
+def count_cjk_chars(text):
+    """
+    Count Chinese/Japanese/Korean unified ideograph characters.
+    """
+    return len(re.findall(r"[\u4e00-\u9fff]", str(text)))
+
+
+def has_untranslated_source_text(source_text, translated_text, source_language, target_language):
+    """
+    Reject partial translations that still contain too much source script.
+    """
+    if not str(source_language).startswith("Chinese") or str(target_language).startswith("Chinese"):
+        return False
+
+    source_cjk_count = count_cjk_chars(source_text)
+    translated_cjk_count = count_cjk_chars(translated_text)
+
+    if source_cjk_count < 10:
+        return False
+
+    return translated_cjk_count > max(6, int(source_cjk_count * 0.08))
+
+
+def split_text_for_translation(text, max_chars=MAX_TRANSLATION_CHARS):
+    """
+    Split long article text by paragraph and sentence for more accurate translation.
+    """
+    normalized_text = str(text).strip()
+    if len(normalized_text) <= max_chars:
+        return [normalized_text]
+
+    chunks = []
+    current_chunk = ""
+    paragraphs = [paragraph.strip() for paragraph in re.split(r"\n\s*\n", normalized_text)]
+
+    for paragraph in paragraphs:
+        if not paragraph:
+            continue
+
+        sentences = split_paragraph_for_translation(paragraph, max_chars)
+
+        for sentence in sentences:
+            if not sentence:
+                continue
+
+            candidate = sentence if not current_chunk else f"{current_chunk}\n\n{sentence}"
+            if len(candidate) <= max_chars:
+                current_chunk = candidate
+            else:
+                chunks.append(current_chunk.strip())
+                current_chunk = sentence
+
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+
+    return chunks
+
+
+def split_paragraph_for_translation(paragraph, max_chars):
+    """
+    Split one paragraph without breaking sentences unless the sentence is too long.
+    """
+    if len(paragraph) <= max_chars:
+        return [paragraph]
+
+    sentences = re.split(r"(?<=[.!?。！？])\s*", paragraph)
+    pieces = []
+
+    for sentence in sentences:
+        sentence = sentence.strip()
+        if not sentence:
+            continue
+
+        if len(sentence) <= max_chars:
+            pieces.append(sentence)
+            continue
+
+        for index in range(0, len(sentence), max_chars):
+            pieces.append(sentence[index:index + max_chars].strip())
+
+    return pieces
 
 
 def get_bilingual_category_label(category, language):
@@ -322,17 +338,11 @@ def detect_language_by_script(text):
     if any(marker in lower_text for marker in malay_markers):
         return "Malay"
 
-    if re.search(r"[\u3040-\u30ff]", text):
-        return "Japanese"
-
-    if re.search(r"[\uac00-\ud7af]", text):
-        return "Korean"
-
     if re.search(r"[\u0600-\u06ff]", text):
         return "Arabic"
 
     if re.search(r"[\u4e00-\u9fff]", text):
-        return "Chinese"
+        return "Chinese (Simplified)"
 
     if re.search(r"[\u0b80-\u0bff]", text):
         return "Tamil"
@@ -368,7 +378,6 @@ def detect_input_language(text):
     return DETECTED_LANGUAGE_NAMES.get(detected_code, "Unknown")
 
 
-@st.cache_data(show_spinner=False)
 def translate_text(text, target_language):
     """
     Auto-detect the input language and translate to the target language.
@@ -394,14 +403,25 @@ def translate_text(text, target_language):
         if detected_source_code not in source_codes:
             source_codes.append(detected_source_code)
 
-    translated_text = try_google_translate(text, target_code, source_codes)
-
-    if not translated_text:
-        raise RuntimeError(
-            f"Translation to {target_language} failed. Please try another language or try again later."
+    translated_chunks = []
+    for chunk in split_text_for_translation(text):
+        translated_chunk = try_google_translate(
+            chunk,
+            target_code,
+            source_codes,
+            source_language=detected_language,
+            target_language=target_language,
         )
 
-    return translated_text
+        if not translated_chunk:
+            raise RuntimeError(
+                f"Translation to {target_language} failed before the full article was translated. "
+                "Please try again later."
+            )
+
+        translated_chunks.append(translated_chunk)
+
+    return "\n\n".join(translated_chunks)
 
 
 def prepare_text_for_prediction(news_text):

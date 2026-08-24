@@ -5,12 +5,13 @@ import joblib
 import numpy as np
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 from article_extraction import extract_article_from_url
 from translation_utils import (
+    TRANSLATION_LANGUAGE_OPTIONS,
     detect_input_language,
     get_bilingual_category_label,
-    get_translation_languages,
     prepare_text_for_prediction,
     translate_text,
 )
@@ -228,6 +229,82 @@ def get_text_stats(news_text):
     return len(words), len(text)
 
 
+def render_live_text_stats(initial_text):
+    word_count, character_count = get_text_stats(initial_text)
+    components.html(
+        f"""
+        <style>
+            .stats-grid {{
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 16px;
+                font-family: "Source Sans Pro", sans-serif;
+            }}
+
+            .stat-card {{
+                background: #151522;
+                border: 1px solid #2D2A3D;
+                border-radius: 8px;
+                padding: 10px 14px 14px;
+                min-height: 78px;
+                box-sizing: border-box;
+            }}
+
+            .stat-label {{
+                color: #A1A1AA;
+                font-size: 14px;
+                font-weight: 700;
+                margin-bottom: 8px;
+            }}
+
+            .stat-value {{
+                color: #F8FAFC;
+                font-size: 34px;
+                line-height: 1;
+                font-weight: 500;
+            }}
+        </style>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Word Count</div>
+                <div class="stat-value" id="live-word-count">{word_count}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Character Count</div>
+                <div class="stat-value" id="live-character-count">{character_count}</div>
+            </div>
+        </div>
+        <script>
+            const wordCount = document.getElementById("live-word-count");
+            const characterCount = document.getElementById("live-character-count");
+
+            function countWords(text) {{
+                const trimmed = text.trim();
+                if (!trimmed) return 0;
+                return Array.from(
+                    trimmed.matchAll(/[\\p{{L}}\\p{{N}}]+/gu)
+                ).length;
+            }}
+
+            function updateCounts() {{
+                const textArea = Array.from(window.parent.document.querySelectorAll("textarea"))
+                    .find((element) => element.getAttribute("aria-label") === "News Article Text");
+
+                if (!textArea) return;
+
+                wordCount.textContent = countWords(textArea.value);
+                characterCount.textContent = textArea.value.trim().length;
+            }}
+
+            updateCounts();
+            const intervalId = window.setInterval(updateCounts, 250);
+            window.addEventListener("beforeunload", () => window.clearInterval(intervalId));
+        </script>
+        """,
+        height=116,
+    )
+
+
 @st.cache_resource
 def load_news_classifier():
     if not SVM_MODEL_PATH.exists():
@@ -336,7 +413,7 @@ def set_quick_sample(sample_name):
     st.session_state["news_text"] = QUICK_SAMPLES[sample_name]
     st.session_state["input_method"] = "Paste text"
     st.session_state.pop("article_url", None)
-    st.session_state.pop("article_source", None)
+    clear_article_source()
     clear_prediction_result()
 
 
@@ -344,10 +421,14 @@ def clear_prediction_result():
     st.session_state.pop("prediction_result", None)
 
 
+def clear_article_source():
+    st.session_state.pop("article_source", None)
+
+
 def clear_news_input():
     st.session_state["news_text"] = ""
     st.session_state["article_url"] = ""
-    st.session_state.pop("article_source", None)
+    clear_article_source()
     clear_prediction_result()
 
 
@@ -366,20 +447,14 @@ def render_sidebar():
 
     st.sidebar.divider()
     st.sidebar.write("Language")
-    translation_languages = list(get_translation_languages().keys())
-    default_language_index = (
-        translation_languages.index("English")
-        if "English" in translation_languages
-        else 0
-    )
     translate_language = st.sidebar.selectbox(
-        "Display Language",
-        translation_languages,
-        index=default_language_index,
+        "Translate Language",
+        TRANSLATION_LANGUAGE_OPTIONS,
+        index=2,
     )
     show_translation = st.sidebar.checkbox(
         "Show translated article",
-        value=False,
+        value=True,
     )
 
     st.sidebar.divider()
@@ -436,6 +511,9 @@ def render_url_input():
             st.warning("Please paste a news article URL first.")
             return
 
+        clear_article_source()
+        clear_prediction_result()
+
         with st.spinner("Reading article from the link..."):
             extraction_result = extract_article_from_url(st.session_state["article_url"])
 
@@ -451,7 +529,6 @@ def render_url_input():
             "final_url": extraction_result.final_url,
             "word_count": extraction_result.word_count,
         }
-        clear_prediction_result()
 
 
 def render_news_input(input_method):
@@ -472,11 +549,12 @@ def render_news_input(input_method):
 
 def render_translation_panel(original_text, translate_language):
     detected_language = detect_input_language(original_text)
-    translated_display_text = translate_text(original_text, translate_language)
 
     with st.expander("Translated article", expanded=False):
         st.write(f"Detected language: {detected_language}")
         st.write(f"{translate_language} translation")
+        with st.spinner(f"Translating full article to {translate_language}..."):
+            translated_display_text = translate_text(original_text, translate_language)
         st.write(translated_display_text)
 
 
@@ -547,11 +625,7 @@ def render_classify_page(translate_language, show_translation):
     )
 
     news_text = render_news_input(input_method)
-    word_count, character_count = get_text_stats(news_text)
-
-    stat_cols = st.columns(2)
-    stat_cols[0].metric("Word Count", word_count)
-    stat_cols[1].metric("Character Count", character_count)
+    render_live_text_stats(news_text)
 
     button_cols = st.columns([1, 1])
     classify_clicked = button_cols[0].button(
