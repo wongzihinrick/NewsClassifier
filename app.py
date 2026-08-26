@@ -62,7 +62,7 @@ QUICK_SAMPLES = {
         "Chief executive Sam Altman stated that the update represents a major technological leap, offering faster "
         "processing speeds and reduced latency across mobile apps and desktop software. Industry analysts noted that "
         "making these advanced multimodal capabilities accessible to all users for free significantly escalates competition "
-        "in the global artificial intelligence and cloud computing market."
+        "in the global artificial intelligence and cloud computing market. (Warren, 2024)"
     ),
     "Business": (
         "The Bank of England has reduced its benchmark interest rate to 5% from 5.25%, marking the first cut in "
@@ -72,7 +72,7 @@ QUICK_SAMPLES = {
         "The move provides relief for mortgage holders and corporate borrowers after two years of steep interest rate "
         "increases designed to combat soaring consumer prices. However, Governor Andrew Bailey emphasised that the central "
         "bank will remain cautious about future reductions, warning that persistent wage growth and services inflation must "
-        "continue to ease before further monetary easing can take place."
+        "continue to ease before further monetary easing can take place. (Wikipedia contributors, 2024)"
     ),
     "Politics": (
         "Sir Keir Starmer has promised to lead a 'government of service' on an urgent mission of national renewal "
@@ -82,7 +82,7 @@ QUICK_SAMPLES = {
         "He pledged to restore public trust in government, rebuild crumbling public infrastructure, and prioritize economic "
         "stability over party political interests. In the coming weeks, the new cabinet ministers will outline legislative "
         "priorities in the King's Speech, focusing heavily on NHS funding, regional housing expansion, and renewable energy "
-        "investments across the United Kingdom."
+        "investments across the United Kingdom. (Wikipedia contributors, 2024)"
     ),
     "Sport": (
         "Spain's Carlos Alcaraz produced a masterclass performance on Centre Court to sweep past seven-time champion "
@@ -91,7 +91,7 @@ QUICK_SAMPLES = {
         "third set before closing out a 6-2 6-2 7-6 triumph.\n\n"
         "The victory sealed the fourth Grand Slam crown of Alcaraz's young career, having already won the French Open just a "
         "month earlier. Speaking during the trophy presentation, Alcaraz praised Djokovic as an inspiration to the sport "
-        "and expressed immense pride in defending his title in front of royalty and a capacity crowd at the All England Club."
+        "and expressed immense pride in defending his title in front of royalty and a capacity crowd at the All England Club. (Wikipedia contributors, 2024)"
     ),
     "Entertainment": (
         "Christopher Nolan's biographical epic Oppenheimer dominated the 96th Academy Awards in Hollywood, securing seven "
@@ -100,7 +100,7 @@ QUICK_SAMPLES = {
         "ceremony with 13 nominations and swept major competitive categories.\n\n"
         "Robert Downey Jr collected the Best Supporting Actor accolade, while the film also claimed trophies for best film "
         "editing, cinematography, and original score. In his acceptance speech, Nolan thanked universal audiences for "
-        "supporting cinema on the big screen, celebrating the collaborative vision of the cast and crew behind the blockbuster release."
+        "supporting cinema on the big screen, celebrating the collaborative vision of the cast and crew behind the blockbuster release. (Wikipedia contributors, 2024)"
     ),
 }
 
