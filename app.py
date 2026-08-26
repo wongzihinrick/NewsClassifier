@@ -54,11 +54,54 @@ CATEGORIES = {
 }
 
 QUICK_SAMPLES = {
-    "Tech": "Apple announced new artificial intelligence features for mobile devices, software developers, and cloud technology users.",
-    "Business": "The company reported higher profit after strong sales growth, market recovery, and increased investor confidence.",
-    "Politics": "The government announced a new policy after parliament debated election reform and public service funding.",
-    "Sport": "The football team won the final match after the player scored a late goal in the tournament.",
-    "Entertainment": "The actor received an award at the film festival after the movie became popular with audiences.",
+    "Tech": (
+        "Artificial intelligence firm OpenAI has revealed its flagship model, GPT-4o, capable of realistic voice "
+        "conversations and real-time interaction across text, vision, and audio. The company demonstrated the system "
+        "translating spoken foreign languages in real time, detecting human facial expressions, and solving complex "
+        "mathematics problems directly from camera feeds.\n\n"
+        "Chief executive Sam Altman stated that the update represents a major technological leap, offering faster "
+        "processing speeds and reduced latency across mobile apps and desktop software. Industry analysts noted that "
+        "making these advanced multimodal capabilities accessible to all users for free significantly escalates competition "
+        "in the global artificial intelligence and cloud computing market."
+    ),
+    "Business": (
+        "The Bank of England has reduced its benchmark interest rate to 5% from 5.25%, marking the first cut in "
+        "borrowing costs in more than four years. Policymakers on the Monetary Policy Committee voted by a narrow 5-4 "
+        "majority in favour of the reduction, following evidence of cooling domestic price pressures and headline "
+        "inflation falling to the official 2% target.\n\n"
+        "The move provides relief for mortgage holders and corporate borrowers after two years of steep interest rate "
+        "increases designed to combat soaring consumer prices. However, Governor Andrew Bailey emphasised that the central "
+        "bank will remain cautious about future reductions, warning that persistent wage growth and services inflation must "
+        "continue to ease before further monetary easing can take place."
+    ),
+    "Politics": (
+        "Sir Keir Starmer has promised to lead a 'government of service' on an urgent mission of national renewal "
+        "following Labour's landslide general election victory that ended 14 years of Conservative administration. Delivering "
+        "his first address outside 10 Downing Street after formally accepting the King's invitation to form a government, "
+        "the new Prime Minister stated that the public had delivered a decisive verdict for institutional reform.\n\n"
+        "He pledged to restore public trust in government, rebuild crumbling public infrastructure, and prioritize economic "
+        "stability over party political interests. In the coming weeks, the new cabinet ministers will outline legislative "
+        "priorities in the King's Speech, focusing heavily on NHS funding, regional housing expansion, and renewable energy "
+        "investments across the United Kingdom."
+    ),
+    "Sport": (
+        "Spain's Carlos Alcaraz produced a masterclass performance on Centre Court to sweep past seven-time champion "
+        "Novak Djokovic in straight sets and retain his Wimbledon gentlemen's singles title. The 21-year-old Spaniard "
+        "dominated from the baseline with overwhelming power and delicate touch, weathering a brief comeback attempt in the "
+        "third set before closing out a 6-2 6-2 7-6 triumph.\n\n"
+        "The victory sealed the fourth Grand Slam crown of Alcaraz's young career, having already won the French Open just a "
+        "month earlier. Speaking during the trophy presentation, Alcaraz praised Djokovic as an inspiration to the sport "
+        "and expressed immense pride in defending his title in front of royalty and a capacity crowd at the All England Club."
+    ),
+    "Entertainment": (
+        "Christopher Nolan's biographical epic Oppenheimer dominated the 96th Academy Awards in Hollywood, securing seven "
+        "Oscars including Best Picture, Best Director, and Best Actor for Irish star Cillian Murphy. The three-hour historical "
+        "drama chronicling the life of theoretical physicist J. Robert Oppenheimer and the Manhattan Project entered the "
+        "ceremony with 13 nominations and swept major competitive categories.\n\n"
+        "Robert Downey Jr collected the Best Supporting Actor accolade, while the film also claimed trophies for best film "
+        "editing, cinematography, and original score. In his acceptance speech, Nolan thanked universal audiences for "
+        "supporting cinema on the big screen, celebrating the collaborative vision of the cast and crew behind the blockbuster release."
+    ),
 }
 
 
