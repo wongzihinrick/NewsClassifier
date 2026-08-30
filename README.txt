@@ -4,7 +4,7 @@ NewsSort AI - Quick Start
 1. Online website
 -----------------
 Open the team's shared Streamlit website link. No installation is needed.
-The website is already connected to the GitHub main branch.
+The website is connected to the project's GitHub repository.
 Url:https://newsclassifier-hjtpgt4fbcbxnvltcmxsc7.streamlit.app/
 
 2. First-time local setup (Anaconda Prompt)

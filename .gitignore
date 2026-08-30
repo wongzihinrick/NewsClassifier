@@ -40,8 +40,7 @@ Thumbs.db
 *.backup
 *.backup-*
 
-# Local validation and generated submission packages
-/submission/
+# Generated build output
 /dist/
 
 # Private report draft: submit the final report separately
