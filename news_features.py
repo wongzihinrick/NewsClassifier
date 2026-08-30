@@ -41,16 +41,15 @@ def split_into_sentences(text):
 
 def generate_core_takeaways(text, max_points=3):
     """
-    Extract 3 core takeaways with distinct emojis (Event, Impact/Detail, Context/Next).
+    Extract 3 core takeaways formatted with dash bullet points (-).
     Uses sentence position, length, and keyword significance scoring.
     """
     sentences = split_into_sentences(text)
     if not sentences:
-        return [f"📌 {text[:120]}..."]
+        return [f"- {text[:120]}..."]
 
     if len(sentences) <= max_points:
-        emojis = ["📌", "💡", "🔍"]
-        return [f"{emojis[i % len(emojis)]} {s}" for i, s in enumerate(sentences)]
+        return [f"- {s}" for s in sentences]
 
     # Compute word frequencies
     words = re.findall(r"\b[a-zA-Z\u4e00-\u9fa5]{3,}\b", text.lower())
@@ -86,10 +85,9 @@ def generate_core_takeaways(text, max_points=3):
     scored_sentences.sort(key=lambda x: x[0], reverse=True)
     top_picks = sorted(scored_sentences[:max_points], key=lambda x: x[1])
 
-    emojis = ["📌", "💡", "🔍"]
     takeaways = []
-    for i, (_, _, sentence) in enumerate(top_picks):
-        takeaways.append(f"{emojis[i % len(emojis)]} {sentence}")
+    for _, _, sentence in top_picks:
+        takeaways.append(f"- {sentence}")
 
     return takeaways
 
