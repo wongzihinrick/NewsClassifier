@@ -1,2 +1,2 @@
 Model,Accuracy,Precision,Recall,F1-score,CV F1-score,Best Parameters,Feature Method
-Complement Naive Bayes,0.9842696629213483,0.9843330026862156,0.9842696629213483,0.9842190365630713,0.9724694867727266,"{'alpha': 0.1, 'norm': True}",Word TF-IDF + Character n-gram TF-IDF
+Complement Naive Bayes,0.9842696629213483,0.9843330026862156,0.9842696629213483,0.9842190365630713,0.9735893015166572,"{'alpha': 0.1, 'norm': True}",Word TF-IDF + Character n-gram TF-IDF

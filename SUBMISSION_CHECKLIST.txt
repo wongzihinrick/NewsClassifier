@@ -1,0 +1,55 @@
+NewsSort AI - Submission Checklist
+==================================
+
+Confirmed setup
+---------------
+[x] Online hosting is connected to main (confirmed by the team; unchanged here).
+[x] A notebook deliverable is not required (confirmed by the team).
+[x] All three saved classifiers match scikit-learn 1.9.0.
+[x] IDE/cache files are no longer tracked; local copies are preserved.
+[x] Runtime and submission instructions use TXT files.
+
+Results note
+------------
+Complement Naive Bayes test accuracy, precision, recall and F1 are unchanged.
+Its CV F1 changed from 0.9724694868 to 0.9735893015 after the team's retraining.
+[ ] Update any CV table in the report to match the latest results CSV.
+    No update is needed solely for the unchanged test-set scores.
+Existing trainers fit TF-IDF before classifier-only cross-validation. Do not
+describe those CV figures as fully fold-isolated evaluation of the whole pipeline.
+
+Before commit and push
+----------------------
+[ ] Review the prepared changes, including the team's retrained model/results.
+[ ] Keep source code, all three models, dataset (if permitted), results and diagrams.
+[ ] Confirm dataset source and redistribution terms before public publication.
+    BBC dataset source: http://mlg.ucd.ie/datasets/bbc.html
+[ ] Keep secrets, local environments, report drafts and backups out of Git.
+[ ] Select the final report separately and complete accurate AI usage disclosures.
+    Development/documentation preparation included Codex assistance.
+
+Final checks
+------------
+[ ] Test a fresh Release ZIP using the Anaconda steps in README.txt.
+[ ] In the activated environment, run:
+    python -m pip check
+    python -m unittest discover -s tests -v
+[ ] Manually test URL extraction, translation and audio.
+[ ] Confirm the online website works after the final push to main.
+No hosting reconnection is needed. Anaconda/cloud/browser behavior should be
+verified separately; Python-environment smoke tests do not certify those paths.
+
+Release and Google Classroom
+-----------------------------
+[ ] Commit and push the reviewed version to main.
+[ ] Create a release tag such as v1.0.0-submission at that same commit.
+[ ] Download Source code (zip), extract it and verify the required files are present.
+[ ] Submit the tested ZIP and final report to Google Classroom as instructed.
+    If one ZIP is required, combine them locally; do not publish personal report
+    details to a public release without the team's agreement.
+[ ] Keep a working local copy ready as the presentation backup.
+[ ] Avoid changing main after submission so the online demo matches the Release.
+
+Only committed files enter the GitHub source ZIP. Empty folders and ignored
+files are excluded. .gitattributes excludes AGENTS.md and devcontainer setup from
+source archives. Removing tracking does not remove files from older commits.

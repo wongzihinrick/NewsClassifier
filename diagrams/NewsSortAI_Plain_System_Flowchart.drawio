@@ -1,0 +1,208 @@
+<mxfile host="app.diagrams.net" agent="Codex" pages="2">
+  <diagram id="NewsSortAIRequestedFlowchartDataset" name="Requested Flowchart - Dataset">
+    <mxGraphModel dx="3718" dy="1554" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="1500" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_dataset" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;" value="BBC News Dataset" vertex="1">
+          <mxGeometry height="52" width="300" x="300" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_preprocess" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;" value="Data Preprocessing (Cleaning and preparing text data)" vertex="1">
+          <mxGeometry height="70" width="360" x="270" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_tfidf" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;" value="Feature Extraction using TF-IDF" vertex="1">
+          <mxGeometry height="58" width="380" x="260" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_features" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;align=left;spacingLeft=16;" value="&lt;div style=&quot;text-align: justify;&quot;&gt;Feature Extraction using TF-IDF&lt;/div&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;- Word TF-IDF&lt;/div&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;- Character n-gram TF-IDF&lt;/div&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;(3-5 character sequences)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="300" x="300" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_split" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;" value="Dataset Splitting" vertex="1">
+          <mxGeometry height="58" width="300" x="300" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_trainData" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=13;fontColor=#000000;" value="Training Data" vertex="1">
+          <mxGeometry height="52" width="210" x="155" y="535" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_testData" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=13;fontColor=#000000;" value="Testing Data" vertex="1">
+          <mxGeometry height="52" width="210" x="535" y="535" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_train" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=13;fontColor=#000000;" value="Model Training" vertex="1">
+          <mxGeometry height="52" width="210" x="155" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_test" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=13;fontColor=#000000;" value="Model Testing" vertex="1">
+          <mxGeometry height="52" width="210" x="535" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_svm" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=13;fontColor=#000000;" value="SVM" vertex="1">
+          <mxGeometry height="54" width="180" x="80" y="771" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_logreg" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=13;fontColor=#000000;" value="Logistic Regression" vertex="1">
+          <mxGeometry height="54" width="180" x="360" y="772" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_cnb" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=13;fontColor=#000000;" value="Complement Naive Bayes" vertex="1">
+          <mxGeometry height="64" width="180" x="640" y="766" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_eval" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;align=center;spacingLeft=16;" value="&lt;div style=&quot;text-align: justify;&quot;&gt;Performance Evaluation&lt;/div&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;- Accuracy&lt;/div&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;- Precision&lt;/div&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;- Recall&lt;/div&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;- F1-score&lt;/div&gt;" vertex="1">
+          <mxGeometry height="145" width="210" x="345" y="970" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_compare" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;" value="Model Performance Comparison" vertex="1">
+          <mxGeometry height="58" width="360" x="270" y="1159" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_final" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;" value="Final Model Selection (Based on Evaluation Results)" vertex="1">
+          <mxGeometry height="70" width="360" x="270" y="1280" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_selected" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;" value="&lt;div style=&quot;text-align: justify;&quot;&gt;Final Prediction Model:&lt;/div&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;Support Vector Machine&lt;/div&gt;" vertex="1">
+          <mxGeometry height="58" width="400" x="250" y="1400" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e1" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_dataset" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_preprocess" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e2" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_preprocess" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_tfidf" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e3" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_tfidf" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_features" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e4" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_features" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_split" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e5" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_split" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_trainData" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e6" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_split" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_testData" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e7" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_trainData" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_train" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e8" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_testData" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_test" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e9" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_train" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_svm" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e10" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_train" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_logreg" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e11" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_train" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_cnb" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="260" y="720" />
+              <mxPoint x="730" y="720" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e12" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_svm" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_eval" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="840.09" />
+              <mxPoint x="450" y="840.09" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e13" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_logreg" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_eval" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e14" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_cnb" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_eval" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="840.09" />
+              <mxPoint x="450" y="840.09" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e15" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_eval" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_compare" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e16" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_compare" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_final" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartDataset_e17" edge="1" parent="1" source="NewsSortAIRequestedFlowchartDataset_final" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartDataset_selected" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="NewsSortAIRequestedFlowchartNoDataset" name="Requested Flowchart - Preprocessing">
+    <mxGraphModel dx="2656" dy="1110" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="1500" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="rZHlNUrUmbsvm0MkAR0g-2" edge="1" parent="1" source="NewsSortAIRequestedFlowchartNoDataset_preprocess" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="rZHlNUrUmbsvm0MkAR0g-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="450" y="130" />
+              <mxPoint x="700" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartNoDataset_preprocess" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;" value="User input" vertex="1">
+          <mxGeometry height="70" width="360" x="270" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartNoDataset_tfidf" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;" value="Enter News Text" vertex="1">
+          <mxGeometry height="58" width="380" x="30" y="161" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartNoDataset_split" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;" value="&lt;div&gt;&amp;nbsp;Text Preprocessing&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp;(Cleaning and preparing text)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="58" width="300" x="300" y="408" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartNoDataset_testData" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=13;fontColor=#000000;" value="&lt;pre dir=&quot;ltr&quot;&gt;&lt;code&gt;&lt;font face=&quot;Helvetica&quot;&gt;TF-IDF Feature Transformation&lt;br/&gt;(Word TF-IDF +&lt;br/&gt; Character n-gram TF-IDF)&lt;/font&gt;&lt;/code&gt;&lt;/pre&gt;" vertex="1">
+          <mxGeometry height="64" width="210" x="345" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="rZHlNUrUmbsvm0MkAR0g-4" edge="1" parent="1" source="NewsSortAIRequestedFlowchartNoDataset_test" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="NewsSortAIRequestedFlowchartNoDataset_svm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartNoDataset_test" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=13;fontColor=#000000;" value="&lt;div&gt;&amp;nbsp;Trained Support Vector Machine&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Classification Model&lt;/div&gt;" vertex="1">
+          <mxGeometry height="52" width="210" x="345" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="rZHlNUrUmbsvm0MkAR0g-5" edge="1" parent="1" source="NewsSortAIRequestedFlowchartNoDataset_svm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="NewsSortAIRequestedFlowchartNoDataset_cnb">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartNoDataset_svm" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=13;fontColor=#000000;" value="&lt;pre dir=&quot;ltr&quot;&gt;&lt;code&gt;&lt;font face=&quot;Helvetica&quot;&gt;Support Vector Machine&lt;br/&gt;Prediction Model&lt;/font&gt;&lt;/code&gt;&lt;/pre&gt;" vertex="1">
+          <mxGeometry height="54" width="180" x="360" y="695" as="geometry" />
+        </mxCell>
+        <mxCell id="rZHlNUrUmbsvm0MkAR0g-6" edge="1" parent="1" source="NewsSortAIRequestedFlowchartNoDataset_cnb" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="NewsSortAIRequestedFlowchartNoDataset_eval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartNoDataset_cnb" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=13;fontColor=#000000;" value="Display Prediction Result" vertex="1">
+          <mxGeometry height="64" width="180" x="360" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartNoDataset_eval" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;align=center;spacingLeft=16;" value="&lt;pre dir=&quot;ltr&quot;&gt;&lt;font face=&quot;Helvetica&quot;&gt;Predicted Category&lt;br/&gt;Keyword Importance&lt;br/&gt;Classification Output&lt;/font&gt;&lt;/pre&gt;" vertex="1">
+          <mxGeometry height="58" width="200" x="350" y="895" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartNoDataset_e1" edge="1" parent="1" source="NewsSortAIRequestedFlowchartNoDataset_preprocess" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartNoDataset_tfidf" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartNoDataset_e2" edge="1" parent="1" source="NewsSortAIRequestedFlowchartNoDataset_tfidf" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.48;entryY=0.017;entryDx=0;entryDy=0;entryPerimeter=0;" target="NewsSortAIRequestedFlowchartNoDataset_split" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="220" y="360" />
+              <mxPoint x="444" y="360" />
+            </Array>
+            <mxPoint x="450" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartNoDataset_e5" edge="1" parent="1" source="NewsSortAIRequestedFlowchartNoDataset_split" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartNoDataset_testData" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NewsSortAIRequestedFlowchartNoDataset_e7" edge="1" parent="1" source="NewsSortAIRequestedFlowchartNoDataset_testData" style="endArrow=block;html=1;rounded=0;strokeColor=#000000;edgeStyle=orthogonalEdgeStyle;" target="NewsSortAIRequestedFlowchartNoDataset_test" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rZHlNUrUmbsvm0MkAR0g-8" edge="1" parent="1" source="rZHlNUrUmbsvm0MkAR0g-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="rZHlNUrUmbsvm0MkAR0g-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rZHlNUrUmbsvm0MkAR0g-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;" value="Enter News Url&amp;nbsp;" vertex="1">
+          <mxGeometry height="58" width="380" x="510" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="rZHlNUrUmbsvm0MkAR0g-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=14;fontColor=#000000;align=center;spacingLeft=16;" value="&lt;pre dir=&quot;ltr&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;font face=&quot;Helvetica&quot;&gt;&amp;nbsp;Extract / Retrieve News Content&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;font face=&quot;Helvetica&quot;&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; (For URL input)&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;&lt;/pre&gt;" vertex="1">
+          <mxGeometry height="58" width="230" x="585" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="rZHlNUrUmbsvm0MkAR0g-9" edge="1" parent="1" source="rZHlNUrUmbsvm0MkAR0g-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.477;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="NewsSortAIRequestedFlowchartNoDataset_split">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="360" />
+              <mxPoint x="443.14" y="360" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

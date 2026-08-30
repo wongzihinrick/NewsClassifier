@@ -1,0 +1,3 @@
+# Keep development instructions/configuration out of source release archives.
+/AGENTS.md export-ignore
+/.devcontainer export-ignore
