@@ -1,7 +1,7 @@
 """Offline checks for the submission. No training or original artifact writes."""
 
-import importlib.util
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 import warnings
@@ -14,6 +14,13 @@ from streamlit.testing.v1 import AppTest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+# Keep project imports available when this file is run directly.
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from training import compare_models
+
+
 TEXT = (
     "The football team won the league match after the striker scored two goals. "
     "The coach praised the players and their performance during the final."
@@ -43,15 +50,10 @@ class SubmissionChecks(unittest.TestCase):
                 self.assertIn(prediction[0], model.classes_)
 
     def test_comparison_uses_three_actual_result_files(self):
-        spec = importlib.util.spec_from_file_location(
-            "comparison_test_target", ROOT / "training" / "compare_models.py"
-        )
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp) / "comparison.csv"
-            with patch.object(module, "COMPARISON_PATH", output):
-                module.main()
+            with patch.object(compare_models, "COMPARISON_PATH", output):
+                compare_models.main()
             result = pd.read_csv(output)
             self.assertEqual(set(result["Model"]), {
                 "Support Vector Machine", "Logistic Regression", "Complement Naive Bayes"
